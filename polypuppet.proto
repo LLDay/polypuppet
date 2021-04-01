@@ -1,0 +1,16 @@
+syntax = 'proto3';
+
+enum Command {
+    UNKOWN = 0;
+    STOP = 1;
+    LOGIN = 2;
+    SYNC = 3;
+    OUT = 4;
+}
+
+message Message {
+    Command command = 1;
+    string output = 2;
+    string username = 3;
+    string password = 4;
+}
