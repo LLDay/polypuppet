@@ -3,7 +3,7 @@ from pathlib import Path
 import os
 
 
-class Config:
+class _Config:
     def __init__(self):
         env_path = Path('polypuppet.env')
         load_dotenv(dotenv_path=env_path)
@@ -12,4 +12,4 @@ class Config:
         return os.getenv(env)
 
 
-config = Config()
+config = _Config()
