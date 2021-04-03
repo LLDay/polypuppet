@@ -1,16 +1,18 @@
 syntax = 'proto3';
 
-enum Command {
-    UNKOWN = 0;
+enum MessageType {
+    UNKNOWN = 0;
     STOP = 1;
     LOGIN = 2;
     SYNC = 3;
-    OUT = 4;
+    ACCEPT = 4;
+    OUT = 5;
 }
 
 message Message {
-    Command command = 1;
+    MessageType type = 1;
     string output = 2;
     string username = 3;
     string password = 4;
+    string certname = 5;
 }

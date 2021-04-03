@@ -15,12 +15,14 @@ def parse_arguments():
 
     login_parser = subparsers.add_parser('login')
     login_parser.set_defaults(handler=api.login)
-    login_parser.add_argument('username', nargs=1)
-    login_parser.add_argument('password', nargs=1)
+    login_parser.add_argument('username')
+    login_parser.add_argument('password')
 
     daemon_parser = subparsers.add_parser('daemon')
-    daemon_parser.set_defaults(handler=api.daemon)
-    daemon_parser.add_argument('--stop', '-s', action='store_true')
+    daemon_parser.set_defaults(handler=api.start_daemon)
+
+    stop_parser = subparsers.add_parser('stop')
+    stop_parser.set_defaults(handler=api.stop_daemon)
 
     parsed = parser.parse_args()
     parsed.handler(**vars(parsed))

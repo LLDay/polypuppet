@@ -14,10 +14,23 @@ class Puppet:
         elif value is None:
             print(self._run('config print --section', section, which))
         else:
-            self._run('config set --section', section, which, value)
+            self._run('config set', which, value, '--section', section)
 
-    def sync(noop=False):
-        command = 'agent --test'
+    def sync(self, noop=False):
+        command = ['agent --test']
         if noop:
-            command += ' --noop'
-        self._run(command)
+            command.append('--noop')
+        return self._run(*command)
+
+    def service(self, service_name, ensure=True, enable=None):
+        if enable is None:
+            enable = ensure
+
+        ensure = 'running' if ensure else 'stopped'
+        enable = 'true' if enable else 'false'
+
+        command = ['resource service']
+        command.append(service_name)
+        command.append('ensure=' + ensure)
+        command.append('enable=' + enable)
+        self._run(*command)
