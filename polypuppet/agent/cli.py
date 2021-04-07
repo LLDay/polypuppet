@@ -1,32 +1,49 @@
-import argparse
-import polypuppet.agent.api as api
-from polypuppet.request import request
-from polypuppet.puppet import Puppet
+#!/usr/bin/env python3
+
+import click
+import os
+from polypuppet.daemon.daemon_accessor import DaemonAccessor
 
 
-def _dummy(*args, **kwargs):
+@click.group()
+def cli():
     pass
 
 
-def parse_arguments():
-    parser = argparse.ArgumentParser()
-    parser.set_defaults(handler=_dummy)
-    subparsers = parser.add_subparsers()
+accessor = DaemonAccessor()
 
-    login_parser = subparsers.add_parser('login')
-    login_parser.set_defaults(handler=api.login)
-    login_parser.add_argument('username')
-    login_parser.add_argument('password')
 
-    daemon_parser = subparsers.add_parser('daemon')
-    daemon_parser.set_defaults(handler=api.start_daemon)
+@cli.command()
+@click.argument('username')
+@click.argument('password')
+def login(username, password):
+    accessor.login(username, password)
 
-    stop_parser = subparsers.add_parser('stop')
-    stop_parser.set_defaults(handler=api.stop_daemon)
 
-    parsed = parser.parse_args()
-    parsed.handler(**vars(parsed))
+@cli.command()
+def daemon():
+    accessor.run_daemon()
+    os._exit(0)
+
+
+@cli.command()
+def stop():
+    output = accessor.stop_daemon()
+    if output is not None:
+        print(output)
+
+
+@cli.command()
+@click.argument('name', required=False)
+@click.argument('value', required=False)
+def config(name, value):
+    result = api.change_config(name, value)
+    if isinstance(result, dict):
+        for k, v in result.items():
+            print(k + '=' + v)
+    elif result is not None:
+        print(result)
 
 
 if __name__ == "__main__":
-    parse_arguments()
+    cli()
