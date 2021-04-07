@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "polypuppet"
+version = "0.1.0"
+description = "Administration tool for SPBSTU"
+authors = ["LLDay <ssdenis99@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+python-dotenv = "^0.17.0"
+
+[tool.poetry.scripts]
+polypuppet = "polypuppet.agent.cli:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
