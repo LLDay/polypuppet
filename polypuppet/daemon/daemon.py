@@ -4,84 +4,60 @@ import os
 
 from polypuppet import polypuppet_pb2 as proto
 from polypuppet.config import Config
-from polypuppet.connection import Receiver, send_to_server
 from polypuppet.puppet import Puppet
+from polypuppet.daemon.api import Api
 
 
-class Daemon:
+class Daemon(Api):
     def __init__(self):
         self.config = Config()
         self.puppet = Puppet()
         self.ip = self.config['AGENT_CONTROL_IP']
         self.port = self.config['AGENT_CONTROL_PORT']
-        self.loop = asyncio.new_event_loop()
 
-    def _login_response(self, message, transport):
-        if message.type != proto.LOGIN:
-            return
-        certname = message.certname
-        self.puppet.config('certname', certname, section='agent')
+    async def stop_daemon(self):
+        self.server.close()
+        await self.server.wait_closed()
 
-    def login(self, username, password):
+    async def daemon_connection_handler(self, reader, writer):
+        raw_message = await reader.read()
         message = proto.Message()
-        message.type = proto.LOGIN
-        message.username = username
-        message.password = password
-        return send_to_server(message, handler=self._login_response)
+        message.ParseFromString(raw_message)
 
-    def sync(self):
-        self.puppet.sync(noop=True)
+        output = await getattr(self, message.api_function)(*message.api_args)
+        response = proto.Message()
+        response.type = proto.OUT
+        if output is not None:
+            response.output = str(output)
+        writer.write(response.SerializeToString())
+        writer.write_eof()
+        await writer.drain()
 
-    def accept(self):
-        puppet_info = self.puppet.sync(noop=False)
-
-    def stop_daemon(self):
-        self.loop.call_soon(self.loop.stop)
-
-    def control_message_handler(self, message, transport):
-        if message.type == proto.UNKNOWN:
-            print('Undefined command')
-        elif message.type == proto.STOP:
-            self.stop()
-        elif message.type == proto.LOGIN:
-            self.login(message.username, message.password)
-        elif message.type == proto.SYNC:
-            self.sync()
-        elif message.type == proto.ACCEPT:
-            self.accept()
-        elif message.type == proto.API:
-            output = getattr(self, message.api_function)(*message.api_args)
-            answer = proto.Message()
-            answer.type = proto.OUT
-            if output is not None:
-                answer.output = str(output)
-            transport.write(answer.SerializeToString())
-
-    def _run_new_process(self):
-        coro = self.loop.create_server(
-            lambda: Receiver(self.control_message_handler), self.ip, self.port)
-        try:
-            self.loop.run_until_complete(coro)
-            print('Start daemon')
-            print('Listen to the local port', self.port)
-            print('Forked into the process with pid', os.getpid())
-            self.loop.run_forever()
-        except:
-            print('Daemon has been already runned')
-        finally:
-            self.loop.close()
-
-    def run(self):
+    async def run(self):
         if os.getuid() != 0:
             print('Daemon must run with superuser priviliges')
             return
-        process = mp.Process(target=self._run_new_process, daemon=True)
+        try:
+            self.server = await asyncio.start_server(
+                self.daemon_connection_handler, self.ip, self.port)
+        except:
+            print('Daemon has been already runned')
+            return
+
+        print('Start daemon')
+        print('Listen to the local port', self.port)
+        print('Forked into the process with pid', os.getpid())
+        await asyncio.wait([self.server.serve_forever()])
+
+    def forked_run(self):
+        process = mp.Process(target=lambda: asyncio.run(
+            self.run()), daemon=True)
         process.start()
 
 
 def main():
     daemon = Daemon()
-    daemon.run()
+    asyncio.run(daemon.run())
 
 
 if __name__ == "__main__":

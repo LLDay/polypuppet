@@ -22,15 +22,18 @@ def login(username, password):
 
 @cli.command()
 def daemon():
+    accessor.stop_daemon()
     accessor.run_daemon()
     os._exit(0)
 
 
 @cli.command()
 def stop():
-    output = accessor.stop_daemon()
-    if output is not None:
-        print(output)
+    message = accessor.stop_daemon()
+    if message.success:
+        print('Server stopped successfully')
+    if message.output:
+        print(message.output)
 
 
 @cli.command()

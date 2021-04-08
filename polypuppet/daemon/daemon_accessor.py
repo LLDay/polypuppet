@@ -1,36 +1,50 @@
 import asyncio
 
 from polypuppet.daemon.api import Api
-from polypuppet.connection import send_to_daemon
+from polypuppet.config import Config
+from polypuppet.daemon import Daemon
 import polypuppet.polypuppet_pb2 as proto
-import polypuppet.daemon.daemon as daemon
 
 
 class _DaemonSender:
     def __init__(self, function):
         self.function = function
-        self.loop = asyncio.get_event_loop()
-        self.fut = self.loop.create_future()
+        config = Config()
+        self.ip = config['AGENT_CONTROL_IP']
+        self.port = config['AGENT_CONTROL_PORT']
 
-    def _handler(self, message, transport):
-        if message.type == proto.OUT:
-            self.fut.set_result(message.output)
+    async def _connect_daemon(self, *args):
+        try:
+            reader, writer = await asyncio.open_connection(self.ip, self.port)
+        except:
+            return proto.Message()
 
-    def __call__(self, *args):
         message = proto.Message()
         message.type = proto.API
         message.api_function = self.function
         for arg in args:
             message.api_args.append(str(arg))
 
-        if send_to_daemon(message, self._handler):
-            self.loop.run_until_complete(asyncio.wait([self.fut]))
-            return self.fut.result()
+        writer.write(message.SerializeToString())
+        writer.write_eof()
+        await writer.drain()
+
+        raw_message = await reader.read()
+        writer.close()
+        await writer.wait_closed()
+
+        message = proto.Message()
+        message.ParseFromString(raw_message)
+        return message
+
+    def __call__(self, *args):
+        return asyncio.run(self._connect_daemon(*args))
 
 
 class DaemonAccessor(Api):
     def __getattribute__(self, attr):
         if attr == 'run_daemon':
-            return daemon.main
+            daemon = Daemon()
+            return daemon.forked_run
         else:
             return _DaemonSender(attr)
