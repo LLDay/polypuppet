@@ -1,12 +1,15 @@
-class Api:
-    def config(self, name=None, value=None):
-        pass
+#
+# Interfaces of the daemon
+#
 
-    def login(self, username, password):
-        pass
-
-    def run_daemon(self):
-        pass
-
+class DaemonApi:
     def stop_daemon(self):
+        pass
+
+    def autoconf(self, certname):
+        pass
+
+
+class ServerApi:
+    def login(self, username, password):
         pass

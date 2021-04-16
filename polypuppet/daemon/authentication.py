@@ -1,6 +1,6 @@
 import json
 
-from polypuppet.request import request
+from polypuppet.daemon.request import request
 from polypuppet.person import Person, PersonType
 
 _payload = {

@@ -2,7 +2,7 @@
 
 import click
 import os
-from polypuppet.daemon.daemon_accessor import DaemonAccessor
+from polypuppet.api import ApiAccessor
 
 
 @click.group()
@@ -10,7 +10,7 @@ def cli():
     pass
 
 
-accessor = DaemonAccessor()
+accessor = ApiAccessor()
 
 
 @cli.command()
@@ -22,7 +22,6 @@ def login(username, password):
 
 @cli.command()
 def daemon():
-    accessor.stop_daemon()
     accessor.run_daemon()
     os._exit(0)
 
@@ -37,13 +36,18 @@ def stop():
 
 
 @cli.command()
-@click.argument('name', required=False)
+@click.argument('key', required=False)
 @click.argument('value', required=False)
-def config(name, value):
-    result = api.change_config(name, value)
+def config(key, value):
+    result = accessor.config(key, value)
     if isinstance(result, dict):
         for k, v in result.items():
             print(k + '=' + v)
+    elif result is False:
+        print('There is no key', key)
+        exit(1)
+    elif result is True:
+        pass
     elif result is not None:
         print(result)
 

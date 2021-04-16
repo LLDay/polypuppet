@@ -7,6 +7,7 @@ enum MessageType {
     SYNC = 3;
     ACCEPT = 4;
     OUT = 5;
+    API = 6;
 }
 
 message Message {
@@ -15,4 +16,7 @@ message Message {
     string username = 3;
     string password = 4;
     string certname = 5;
+
+    string api_function = 6;
+    repeated string api_args = 7;
 }
