@@ -13,22 +13,18 @@ class Agent:
         self._config = Config()
 
     async def _connect(self, ip, port, message):
-        try:
-            reader, writer = await asyncio.open_connection(ip, port)
-            writer.write(message.SerializeToString())
-            writer.write_eof()
-            await writer.drain()
+        reader, writer = await asyncio.open_connection(ip, port)
+        writer.write(message.SerializeToString())
+        writer.write_eof()
+        await writer.drain()
 
-            raw_message = await reader.read()
-            writer.close()
-            await writer.wait_closed()
+        raw_message = await reader.read()
+        writer.close()
+        await writer.wait_closed()
 
-            response = proto.Message()
-            response.ParseFromString(raw_message)
-            return response
-        except Exception as e:
-            print(e)
-            return proto.Message()
+        response = proto.Message()
+        response.ParseFromString(raw_message)
+        return response
 
     def connect_lan(self, message):
         ip = self._config['CONTROL_IP']
@@ -58,33 +54,6 @@ class Agent:
             puppet.certname(response.certname)
             puppet.sync(noop=True)
         return response.ok
-
-    def config(self, key=None, value=None):
-        if key is None and value is None:
-            return self._config.all()
-
-        if key not in self._config:
-            return False
-        elif value is None:
-            return self._config[key]
-        else:
-            self._config[key] = value
-            return True
-
-    def apply(self):
-        puppet = Puppet()
-        self.puppet.sync()
-
-    def run_server(self):
-        server.main()
-
-    def _do_fork(self):
-        print('Forked into process with pid', os.getpid())
-        self.run_server()
-
-    def fork_server(self):
-        process = mp.Process(target=self._do_fork)
-        process.start()
 
     def stop_server(self):
         message = proto.Message()

@@ -1,5 +1,5 @@
 import asyncio
-from polypuppet.config import Config
+from polypuppet import Config
 
 
 class CertList:

@@ -1,7 +1,7 @@
 import json
 
 from requests_html import HTMLSession
-from polypuppet.person import Person, PersonType
+from polypuppet.server.person import Person, PersonType
 
 _payload = {
     "username": "",

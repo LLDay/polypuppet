@@ -3,7 +3,7 @@ import asyncio
 from polypuppet import proto
 from polypuppet import Config
 from polypuppet import PuppetServer
-from polypuppet.person import PersonType
+from polypuppet.server.person import PersonType
 from polypuppet.server.cert_list import CertList
 from polypuppet.server.authentication import authenticate
 
@@ -48,8 +48,6 @@ class Server:
 
         if message.type == proto.AUTOSIGN:
             response.ok = self.certlist.check_and_remove(message.certname)
-            print('Autosign request')
-            print('Result', response.ok)
         elif message.type == proto.STOP:
             await self.stop()
         await self._answer(writer, response)
@@ -68,12 +66,8 @@ class Server:
         return certname
 
     async def run(self):
-        try:
-            self.agent_connection = await asyncio.start_server(self.agent_message_handler, self.server_ip, self.server_port)
-            self.control_connection = await asyncio.start_server(self.control_message_handler, self.control_ip, self.control_port)
-        except Exception as e:
-            print(e)
-            return
+        self.agent_connection = await asyncio.start_server(self.agent_message_handler, self.server_ip, self.server_port)
+        self.control_connection = await asyncio.start_server(self.control_message_handler, self.control_ip, self.control_port)
         await asyncio.wait([self.agent_connection.serve_forever(), self.control_connection.serve_forever()])
         print('Server stopped successfully')
 

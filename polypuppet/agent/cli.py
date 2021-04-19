@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
 import click
-import os
 import getpass
+import multiprocessing as mp
+import os
+
 from polypuppet import Config
 from polypuppet.agent.agent import Agent
-from polypuppet.setup import setup_server, setup_agent
+from polypuppet.agent.setup import setup_server, setup_agent
+from polypuppet.server.server import main as server_main
 
 
 @click.group()
@@ -41,12 +44,12 @@ def login(username, password):
 @cli.command()
 @click.option('-d', '--daemon', is_flag=True, default=False)
 def server(daemon):
-    agent = Agent()
     if daemon:
-        agent.fork_server()
+        process = mp.Process(target=server_main)
+        process.start()
         os._exit(0)
     else:
-        agent.run_server()
+        server_main()
 
 
 @cli.command()
@@ -60,21 +63,20 @@ def stop():
 @click.argument('value', required=False)
 @click.option('-k', '--keys-only', is_flag=True)
 def config(key, value, keys_only):
-    agent = Agent()
-    result = agent.config(key, value)
+    config = Config()
     if keys_only:
-        for k in result:
+        for k in config.all():
             print(k)
-    elif isinstance(result, dict):
-        for k, v in result.items():
+    elif key is None:
+        for k, v in config.all().items():
             print(k + '=' + v)
-    elif result is False:
+    elif key not in config:
         print('There is no key', key)
         exit(1)
-    elif result is True:
-        pass
-    elif result is not None:
-        print(result)
+    elif value is None:
+        print(config[key])
+    else:
+        config[key] = value
 
 
 @cli.command()

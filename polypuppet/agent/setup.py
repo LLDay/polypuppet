@@ -1,9 +1,9 @@
 import configparser
 import re
 
-from polypuppet.config import Config
+from polypuppet import Puppet, PuppetServer
+from polypuppet import Config
 from polypuppet.definitions import *
-from polypuppet.puppet import Puppet, PuppetServer
 from pathlib import Path
 
 
