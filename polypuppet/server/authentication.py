@@ -1,6 +1,6 @@
 import json
 
-from polypuppet.daemon.request import request
+from requests_html import HTMLSession
 from polypuppet.person import Person, PersonType
 
 _payload = {
@@ -12,12 +12,17 @@ _payload = {
 }
 
 
+def request(url, path='/', **kwargs):
+    session = HTMLSession()
+    r = session.post(url + path, data=kwargs)
+    return r
+
+
 def authenticate(username, password):
     _payload['username'] = username
     _payload['password'] = password
 
     r = request('https://cas.spbstu.ru', path='/login', **_payload)
-    print(r)
     if r.status_code != 200:
         return Person()
 

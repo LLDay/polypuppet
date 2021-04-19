@@ -1,21 +1,40 @@
-import dotenv
+import configparser
+import re
+
+from polypuppet.config import Config
+from polypuppet.definitions import *
+from polypuppet.puppet import Puppet, PuppetServer
 from pathlib import Path
 
 
-def setup_environment(path):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists():
-        path.unlink()
-    path.touch()
+def setup_server():
+    config = Config()
+    puppet = Puppet()
+    server_name = config['PRIMARY_SERVER_DOMAIN']
+    certname = config['PRIMARY_SERVER_CERTNAME']
 
-    config_params = {}
-    config_params['PRIMARY_SERVER_CERTNAME'] = 'server.poly.puppet.com'
-    config_params['PRIMARY_SERVER_DOMAIN'] = 'server.poly.puppet.com'
-    config_params['PUPPET_MEMORY_USAGE'] = '256m'
-    config_params['PUPPET_VERSION'] = 'puppet7-release'
-    config_params['SERVER_PORT'] = 8668
-    config_params['CONTROL_PORT'] = 8668
-    config_params['CONTROL_IP'] = 'localhost'
+    puppet.service('puppetserver', ensure=False)
+    puppet.config('server', server_name, section='server')
+    puppet.config('certname', certname, section='server')
+    puppet.config('autosign', AUTOSIGN_PATH.as_posix(), section='server')
 
-    for key, value in config_params.items():
-        dotenv.set_key(path, str(key), str(value))
+    if PUPPET_SETTINGS_PATH is not None:
+        with open(PUPPET_SETTINGS_PATH, 'r') as settings:
+            data = settings.read()
+            regex = '(?<=-Xm[sx])[^ ]+'
+            data = re.sub(regex, config['PUPPET_MEMORY_USAGE'], data, 2)
+
+        with open(PUPPET_SETTINGS_PATH, 'w') as settings:
+            settings.write(data)
+
+    puppetserver = PuppetServer()
+    puppetserver.setup()
+    puppet.service('puppetserver')
+
+
+def setup_agent():
+    config = Config()
+    puppet = Puppet()
+    server_name = config['PRIMARY_SERVER_DOMAIN']
+    puppet.config('server', server_name, section='agent')
+    puppet.service('puppet', ensure=False, enable=False)

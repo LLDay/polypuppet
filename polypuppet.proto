@@ -3,20 +3,16 @@ syntax = 'proto3';
 enum MessageType {
     UNKNOWN = 0;
     STOP = 1;
-    LOGIN = 2;
-    SYNC = 3;
-    ACCEPT = 4;
-    OUT = 5;
-    API = 6;
-}
+    AUTOSIGN = 2;
+    LOGIN = 3;
+    RESPONSE = 4;
+};
 
 message Message {
     MessageType type = 1;
-    string output = 2;
-    string username = 3;
-    string password = 4;
-    string certname = 5;
-
-    string api_function = 6;
-    repeated string api_args = 7;
+    string username = 2;
+    string password = 3;
+    string certname = 4;
+    string output = 5;
+    bool ok = 6;
 }

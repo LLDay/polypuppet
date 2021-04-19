@@ -1,11 +1,16 @@
 SHELL := /bin/bash
+PUPPET_CONF_DIR = '/etc/puppetlabs'
 
 .PHONY: server agent clean
 
 server:
-	python3 ./scripts/generate_proto.py
+	./scripts/install_python.sh
+	python3 -m pip install .
 	./scripts/install_server.sh
+	polypuppet setup server
 
 agent:
-	python3 ./scripts/generate_proto.py
+	./scripts/install_python.sh
+	python3 -m pip install .
 	./scripts/install_agent.sh
+	polypuppet setup agent

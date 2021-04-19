@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
 
-BASEDIR=$(dirname $0)
-source "$BASEDIR/../polypuppet.env"
+PRIMARY_SERVER_DOMAIN=$(polypuppet config primary_server_domain)
 
 if which apt-get; then
-    apt-get update
-    apt-get -y install puppet
+    ./scripts/import_puppet.sh
+    apt-get -y install puppet-agent
 fi
 
-puppet config set --section agent server "$PRIMARY_SERVER_DOMAIN"
-puppet resource service puppet ensure=running enable=true
-puppet module install puppet-python
-puppet apply /vagrant/manifests/agent.pp
+/opt/puppetlabs/bin/puppet config set --section agent server "$PRIMARY_SERVER_DOMAIN"
