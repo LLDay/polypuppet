@@ -3,6 +3,7 @@ import asyncio
 from polypuppet import proto
 from polypuppet import Config
 from polypuppet import PuppetServer
+from polypuppet.messages import info, error
 from polypuppet.server.person import PersonType
 from polypuppet.server.cert_list import CertList
 from polypuppet.server.authentication import authenticate
@@ -66,8 +67,16 @@ class Server:
         return certname
 
     async def run(self):
-        self.agent_connection = await asyncio.start_server(self.agent_message_handler, self.server_ip, self.server_port)
-        self.control_connection = await asyncio.start_server(self.control_message_handler, self.control_ip, self.control_port)
+        try:
+            self.agent_connection = await asyncio.start_server(self.agent_message_handler, self.server_ip, self.server_port)
+        except Exception as e:
+            error.server_cannot_bind(self.server_ip, self.server_port, e)
+
+        try:
+            self.control_connection = await asyncio.start_server(self.control_message_handler, self.control_ip, self.control_port)
+        except:
+            error.server_cannot_bind(self.control_ip, self.control_port, e)
+
         await asyncio.wait([self.agent_connection.serve_forever(), self.control_connection.serve_forever()])
         print('Server stopped successfully')
 

@@ -1,5 +1,6 @@
 import subprocess
 from shutil import which
+from polypuppet.messages import info, error
 
 
 class PuppetBase:
@@ -22,7 +23,7 @@ class PuppetBase:
     def __init__(self, executable_name):
         self.path = self._get_full_path(executable_name)
         if self.path is None:
-            raise RuntimeError('Exetuable does not exist')
+            error.puppet_exec_no_exit(executable_name)
 
 
 class Puppet(PuppetBase):

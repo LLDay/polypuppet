@@ -1,5 +1,6 @@
 import configparser
 from polypuppet.definitions import CONFIG_PATH
+from polypuppet.messages import error
 
 
 class Config:
@@ -13,10 +14,13 @@ class Config:
                 self.flat[key] = value
                 self.config[k][key] = value
 
-        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-        CONFIG_PATH.touch(exist_ok=True)
-        with open(CONFIG_PATH, 'w') as configfile:
-            self.config.write(configfile)
+        try:
+            CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+            CONFIG_PATH.touch(exist_ok=True)
+            with open(CONFIG_PATH, 'w') as configfile:
+                self.config.write(configfile)
+        except:
+            error.cannot_create_config_file()
 
     def __contains__(self, key):
         return key in self.flat

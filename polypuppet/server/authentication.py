@@ -2,6 +2,7 @@ import json
 
 from requests_html import HTMLSession
 from polypuppet.server.person import Person, PersonType
+from polypuppet.messages import error
 
 _payload = {
     "username": "",
@@ -12,17 +13,16 @@ _payload = {
 }
 
 
-def request(url, path='/', **kwargs):
-    session = HTMLSession()
-    r = session.post(url + path, data=kwargs)
-    return r
-
-
 def authenticate(username, password):
     _payload['username'] = username
     _payload['password'] = password
 
-    r = request('https://cas.spbstu.ru', path='/login', **_payload)
+    session = HTMLSession()
+    try:
+        r = session.post('https://cas.spbstu.ru/login', _payload)
+    except:
+        error.cannot_connect_to_cas()
+
     if r.status_code != 200:
         return Person()
 

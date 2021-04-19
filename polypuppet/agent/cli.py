@@ -9,6 +9,7 @@ from polypuppet import Config
 from polypuppet.agent.agent import Agent
 from polypuppet.agent.setup import setup_server, setup_agent
 from polypuppet.server.server import main as server_main
+from polypuppet.messages import info, error
 
 
 @click.group()
@@ -31,14 +32,14 @@ def autosign(certname):
 def login(username, password):
     agent = Agent()
     if username is None:
-        username = input('Username: ')
+        username = info.username()
     if password is None:
-        password = getpass.getpass('Password: ')
+        password = info.password()
     response = agent.login(username, password)
     if response:
-        print('Logged in successfully')
+        info.logged_in()
     else:
-        exit(1)
+        error.not_logged_in()
 
 
 @cli.command()
@@ -71,8 +72,7 @@ def config(key, value, keys_only):
         for k, v in config.all().items():
             print(k + '=' + v)
     elif key not in config:
-        print('There is no key', key)
-        exit(1)
+        error.no_config_key(key)
     elif value is None:
         print(config[key])
     else:

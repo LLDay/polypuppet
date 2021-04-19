@@ -6,6 +6,7 @@ from polypuppet import proto
 from polypuppet.server import server
 from polypuppet.config import Config
 from polypuppet.puppet import Puppet
+from polypuppet.messages import error
 
 
 class Agent:
@@ -13,18 +14,21 @@ class Agent:
         self._config = Config()
 
     async def _connect(self, ip, port, message):
-        reader, writer = await asyncio.open_connection(ip, port)
-        writer.write(message.SerializeToString())
-        writer.write_eof()
-        await writer.drain()
+        try:
+            reader, writer = await asyncio.open_connection(ip, port)
+            writer.write(message.SerializeToString())
+            writer.write_eof()
+            await writer.drain()
 
-        raw_message = await reader.read()
-        writer.close()
-        await writer.wait_closed()
+            raw_message = await reader.read()
+            writer.close()
+            await writer.wait_closed()
 
-        response = proto.Message()
-        response.ParseFromString(raw_message)
-        return response
+            response = proto.Message()
+            response.ParseFromString(raw_message)
+            return response
+        except Exception as e:
+            error.agent_cannot_connect_server(ip, port)
 
     def connect_lan(self, message):
         ip = self._config['CONTROL_IP']
