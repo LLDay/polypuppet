@@ -12,39 +12,34 @@ class Config:
             if key in self.config[k]:
                 self.flat[key] = value
                 self.config[k][key] = value
-                with open(CONFIG_PATH, 'w') as configfile:
-                    self.config.write(configfile)
+
+        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        CONFIG_PATH.touch(exist_ok=True)
+        with open(CONFIG_PATH, 'w') as configfile:
+            self.config.write(configfile)
 
     def __contains__(self, key):
         return key in self.flat
 
-    def setup(self, force=False):
-        if not force and CONFIG_PATH.exists():
-            return
-
-        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-        if CONFIG_PATH.exists():
-            CONFIG_PATH.unlink()
-        CONFIG_PATH.touch()
-
-        config = configparser.ConfigParser()
-        config['server'] = {
+    def load(self):
+        default_config = configparser.ConfigParser()
+        default_config['server'] = {
             'CONTROL_IP': 'localhost',
             'CONTROL_PORT': 8668,
             'NEW_CERT_LIFETIME': 90,
             'PRIMARY_SERVER_CERTNAME': 'server.poly.puppet.com',
             'PUPPET_MEMORY_USAGE': '256m'}
-        config['common'] = {
+        default_config['common'] = {
             'PRIMARY_SERVER_DOMAIN': 'server.poly.puppet.com',
             'PUPPET_VERSION': 'puppet7-release',
             'SERVER_PORT': 8668}
-        with open(CONFIG_PATH, 'w') as configfile:
-            config.write(configfile)
 
-    def load(self):
-        self.setup()
-        self.config = configparser.ConfigParser()
-        self.config.read(CONFIG_PATH)
+        if not CONFIG_PATH.exists():
+            self.config = default_config
+        else:
+            self.config = configparser.ConfigParser()
+            self.config.read(CONFIG_PATH)
+
         self.flat = {}
         for key in self.config:
             self.flat.update(self.config[key])

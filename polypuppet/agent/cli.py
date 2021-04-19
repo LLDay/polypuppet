@@ -59,12 +59,7 @@ def stop():
 @click.argument('key', required=False)
 @click.argument('value', required=False)
 @click.option('-k', '--keys-only', is_flag=True)
-@click.option('-g', '--generate', is_flag=True)
-def config(key, value, keys_only, generate):
-    if generate:
-        setup_config()
-        return
-
+def config(key, value, keys_only):
     agent = Agent()
     result = agent.config(key, value)
     if keys_only:
@@ -83,15 +78,12 @@ def config(key, value, keys_only, generate):
 
 
 @cli.command()
-@click.argument('what', type=click.Choice(['config', 'agent', 'server']), required=True)
+@click.argument('what', type=click.Choice(['agent', 'server']), required=True)
 def setup(what):
     if what == 'server':
         setup_server()
     elif what == 'agent':
         setup_agent()
-    elif what == 'config':
-        config = Config()
-        config.setup(force=True)
 
 
 if __name__ == "__main__":
