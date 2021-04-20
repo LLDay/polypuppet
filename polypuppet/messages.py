@@ -30,6 +30,20 @@ class _InfoEn:
     def cannot_connect_to_cas(self):
         print('Cannot connect to the CAS')
 
+    def wait_for_cert(self, certname):
+        print('Waiting for CSR from', certname)
+
+    def stop_waiting_for_cert(self, certname):
+        print('Stop waiting for CSR from', certname)
+
+    def request_for_cert(self, certname, presented):
+        print('Puppetserver requested for', certname)
+        if presented:
+            print('This certname is presented')
+            self.stop_waiting_for_cert(certname)
+        else:
+            print('This certname is not presented')
+
     def server_cannot_bind(self, ip, port, why):
         print('Server cannot bind', ip, 'with port', port)
         print(why)
