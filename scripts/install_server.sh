@@ -14,3 +14,7 @@ if [ ! -f /opt/puppetlabs/server/bin/puppetserver ]; then
         yum install -y puppetserver
     fi
 fi
+
+/opt/puppetlabs/bin/puppet module install puppet-r10k
+/opt/puppetlabs/bin/puppet apply manifests/r10k.pp
+r10k deploy environment -pv
