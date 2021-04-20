@@ -1,8 +1,12 @@
 import asyncio
+import pathlib
+import socket
+import ssl
 
 from polypuppet import proto
 from polypuppet import Config
-from polypuppet import PuppetServer
+from polypuppet import PuppetServer, Puppet
+from polypuppet.definitions import POLYPUPPET_PEM_NAME, EOF_SIGN
 from polypuppet.messages import info, error
 from polypuppet.server.person import PersonType
 from polypuppet.server.cert_list import CertList
@@ -11,23 +15,21 @@ from polypuppet.server.authentication import authenticate
 
 class Server:
     def __init__(self):
-        config = Config()
+        self.config = Config()
+        self.puppet = Puppet()
         self.puppetserver = PuppetServer()
         self.certlist = CertList()
-        self.server_ip = config['PRIMARY_SERVER_DOMAIN']
-        self.server_port = config['SERVER_PORT']
-        self.control_ip = config['CONTROL_IP']
-        self.control_port = config['CONTROL_PORT']
 
     async def _read_message(self, reader):
-        raw_message = await reader.read()
+        raw_message = await reader.readuntil(EOF_SIGN)
+        raw_message = raw_message[:-len(EOF_SIGN)]
         message = proto.Message()
         message.ParseFromString(raw_message)
         return message
 
     async def _answer(self, writer, response):
         writer.write(response.SerializeToString())
-        writer.write_eof()
+        writer.write(EOF_SIGN)
         await writer.drain()
 
     async def agent_message_handler(self, reader, writer):
@@ -66,19 +68,38 @@ class Server:
         self.certlist.append(certname)
         return certname
 
-    async def run(self):
-        try:
-            self.agent_connection = await asyncio.start_server(self.agent_message_handler, self.server_ip, self.server_port)
-        except Exception as e:
-            error.server_cannot_bind(self.server_ip, self.server_port, e)
+    def get_ssl_context(self):
+        ssldir = pathlib.Path(self.config['SSLDIR'])
+        ssl_cert = ssldir / ('certs/' + POLYPUPPET_PEM_NAME + '.pem')
+        ssl_private = ssldir / ('private_keys/' + POLYPUPPET_PEM_NAME + '.pem')
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+        ssl_context.load_cert_chain(ssl_cert, ssl_private)
+        return ssl_context
 
+    async def _create_ssl_connection(self, ip, port, handler):
+        ssl_context = self.get_ssl_context()
         try:
-            self.control_connection = await asyncio.start_server(self.control_message_handler, self.control_ip, self.control_port)
-        except:
-            error.server_cannot_bind(self.control_ip, self.control_port, e)
+            sock = socket.create_server((ip, port))
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+
+        except Exception as e:
+            error.server_cannot_bind(ip, port, e)
+        wrapper = ssl_context.wrap_socket(sock, server_side=True)
+        return await asyncio.start_server(handler, sock=wrapper)
+
+    async def run(self):
+        server_ip = self.config['PRIMARY_SERVER_DOMAIN']
+        server_port = int(self.config['SERVER_PORT'])
+        control_ip = self.config['CONTROL_IP']
+        control_port = int(self.config['CONTROL_PORT'])
+
+        self.agent_connection = await self._create_ssl_connection(
+            server_ip, server_port, self.agent_message_handler)
+        self.control_connection = await self._create_ssl_connection(
+            control_ip, control_port, self.control_message_handler)
 
         await asyncio.wait([self.agent_connection.serve_forever(), self.control_connection.serve_forever()])
-        print('Server stopped successfully')
+        info.server_stopped()
 
     async def stop(self):
         self.agent_connection.close()

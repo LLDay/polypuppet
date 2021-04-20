@@ -48,6 +48,9 @@ class _InfoEn:
         print('Server cannot bind', ip, 'with port', port)
         print(why)
 
+    def server_stopped(self):
+        print('Server stopped successfully')
+
 
 class _Error(_InfoEn):
     def __getattribute__(self, attr):

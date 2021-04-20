@@ -29,6 +29,7 @@ class Config:
         default_config = configparser.ConfigParser()
         default_config['server'] = {
             'CONTROL_IP': 'localhost',
+            'SSLDIR': '/etc/puppetlabs/puppet/ssl',
             'CONTROL_PORT': 8668,
             'NEW_CERT_LIFETIME': 90,
             'PRIMARY_SERVER_CERTNAME': 'server.poly.puppet.com',

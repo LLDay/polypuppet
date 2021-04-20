@@ -17,8 +17,9 @@ class PuppetBase:
     def _run(self, *args):
         full_command = ' '.join([self.path, *args])
         print(full_command)
-        run = subprocess.run(full_command.split(), text=True)
-        return run.stdout
+        run = subprocess.run(full_command.split(),
+                             capture_output=True, text=True)
+        return run.stdout.strip()
 
     def __init__(self, executable_name):
         self.path = self._get_full_path(executable_name)
@@ -32,11 +33,11 @@ class Puppet(PuppetBase):
 
     def config(self, which, value=None, rm=False, section='agent'):
         if rm:
-            self._run('config delete --section', section, which)
+            return self._run('config delete --section', section, which)
         elif value is None:
-            print(self._run('config print --section', section, which))
+            return self._run('config print --section', section, which)
         else:
-            self._run('config set', which, value, '--section', section)
+            return self._run('config set', which, value, '--section', section)
 
     def certname(self, value=None):
         if value is None:
@@ -68,6 +69,9 @@ class Puppet(PuppetBase):
 class PuppetServer(PuppetBase):
     def __init__(self):
         super().__init__('puppetserver')
+
+    def generate(self, certname):
+        return self._run('ca generate --certname', certname)
 
     def setup(self):
         return self._run('ca setup')
