@@ -72,6 +72,9 @@ class Server:
         ssldir = pathlib.Path(self.config['SSLDIR'])
         ssl_cert = ssldir / ('certs/' + POLYPUPPET_PEM_NAME + '.pem')
         ssl_private = ssldir / ('private_keys/' + POLYPUPPET_PEM_NAME + '.pem')
+        if not ssl_cert.exists() or not ssl_private.exists():
+            error.must_call_setup_server()
+
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
         ssl_context.load_cert_chain(ssl_cert, ssl_private)
         return ssl_context

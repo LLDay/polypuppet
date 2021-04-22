@@ -51,6 +51,9 @@ class _InfoEn:
     def server_stopped(self):
         print('Server stopped successfully')
 
+    def must_call_setup_server(self):
+        print('You must call "polypuppet setup server" first')
+
 
 class _Error(_InfoEn):
     def __getattribute__(self, attr):
