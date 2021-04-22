@@ -42,7 +42,7 @@ class Agent:
         return response
 
     def connect_lan(self, message):
-        ip = self._config['CONTROL_IP']
+        ip = 'localhost'
         port = self._config['CONTROL_PORT']
         return asyncio.run(self._connect(ip, port, message))
 

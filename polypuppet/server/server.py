@@ -93,7 +93,7 @@ class Server:
     async def run(self):
         server_ip = self.config['SERVER_DOMAIN']
         server_port = int(self.config['SERVER_PORT'])
-        control_ip = self.config['CONTROL_IP']
+        control_ip = 'localhost'
         control_port = int(self.config['CONTROL_PORT'])
 
         self.agent_connection = await self._create_ssl_connection(
