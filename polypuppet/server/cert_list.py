@@ -7,7 +7,7 @@ class CertList:
     def __init__(self):
         config = Config()
         self.certlist = []
-        self.timeout = int(config['NEW_CERT_LIFETIME'])
+        self.timeout = int(config['CERT_WAITTIME'])
 
     async def _certname_stopwatch(self, certname):
         await asyncio.sleep(self.timeout)

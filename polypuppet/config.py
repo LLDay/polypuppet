@@ -28,16 +28,19 @@ class Config:
     def load(self):
         default_config = configparser.ConfigParser()
         default_config['server'] = {
-            'CONTROL_IP': 'localhost',
-            'SSLDIR': '/etc/puppetlabs/puppet/ssl',
-            'CONTROL_PORT': 8668,
-            'NEW_CERT_LIFETIME': 90,
-            'PRIMARY_SERVER_CERTNAME': 'server.poly.puppet.com',
-            'PUPPET_MEMORY_USAGE': '256m'}
-        default_config['common'] = {
-            'PRIMARY_SERVER_DOMAIN': 'server.poly.puppet.com',
-            'PUPPET_VERSION': 'puppet7-release',
+            'SERVER_DOMAIN': 'server.poly.puppet.com',
+            'SERVER_CERTNAME': 'server.poly.puppet.com',
             'SERVER_PORT': 8668}
+        default_config['agent'] = {
+            'CONTROL_PORT': 8668,
+            'CERT_WAITTIME': 90,
+            'ENABLE': False}
+        default_config['profile'] = {
+            'AUDIENCE': '',
+            'STUDENT_FLOW': '',
+            'STUDENT_GROUP': ''}
+        default_config['cache'] = {
+            'SSLDIR': '/etc/puppetlabs/puppet/ssl'}
 
         if not CONFIG_PATH.exists():
             self.config = default_config

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-PRIMARY_SERVER_DOMAIN=$(polypuppet config primary_server_domain)
-PRIMARY_SERVER_CERTNAME=$(polypuppet config primary_server_certname)
-PUPPET_MEMORY_USAGE=$(polypuppet config puppet_memory_usage)
+SERVER_DOMAIN=$(polypuppet config server_domain)
+SERVER_CERTNAME=$(polypuppet config server_certname)
+PUPPET_MEMORY_USAGE=256m
 
 if [ ! -f /opt/puppetlabs/server/bin/puppetserver ]; then
     if which apt-get; then
@@ -14,6 +14,14 @@ if [ ! -f /opt/puppetlabs/server/bin/puppetserver ]; then
         yum install -y puppetserver
     fi
 fi
+
+/opt/puppetlabs/bin/puppet resource package perl ensure=installed
+if [ -f /etc/default/puppetserver ]; then
+    PUPPET_RUN_CONFIG_PATH=/etc/default/puppetserver
+elif [ -f /etc/sysconfig/puppet  ]; then
+    PUPPET_RUN_CONFIG_PATH=/etc/sysconfig/puppetserver
+fi
+perl -pi -e "s#(?<=-Xm[sx])[^ ]+#$PUPPET_MEMORY_USAGE#g" "$PUPPET_RUN_CONFIG_PATH"
 
 /opt/puppetlabs/bin/puppet module install puppet-r10k
 /opt/puppetlabs/bin/puppet apply manifests/r10k.pp

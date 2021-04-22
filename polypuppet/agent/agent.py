@@ -47,7 +47,7 @@ class Agent:
         return asyncio.run(self._connect(ip, port, message))
 
     def connect_wan(self, message):
-        ip = self._config['PRIMARY_SERVER_DOMAIN']
+        ip = self._config['SERVER_DOMAIN']
         port = self._config['SERVER_PORT']
         return asyncio.run(self._connect(ip, port, message))
 

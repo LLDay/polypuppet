@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-PUPPET_VERSION=$(polypuppet config puppet_version)
+PUPPET_VERSION='puppet7-release'
 UBUNTU_VERSION=$(lsb_release -sc)
 FILENAME="$PUPPET_VERSION-$UBUNTU_VERSION.deb"
 
