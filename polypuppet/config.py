@@ -42,11 +42,13 @@ class Config:
         default_config['cache'] = {
             'SSLDIR': '/etc/puppetlabs/puppet/ssl'}
 
-        if not CONFIG_PATH.exists():
-            self.config = default_config
-        else:
-            self.config = configparser.ConfigParser()
-            self.config.read(CONFIG_PATH)
+        if CONFIG_PATH.exists():
+            read_config = configparser.ConfigParser()
+            read_config.read(CONFIG_PATH)
+            for k, v in read_config.items():
+                if k in default_config:
+                    default_config[k] = v
+        self.config = default_config
 
         self.flat = {}
         for key in self.config:
