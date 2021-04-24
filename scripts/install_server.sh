@@ -21,7 +21,9 @@ if [ -f /etc/default/puppetserver ]; then
 elif [ -f /etc/sysconfig/puppet  ]; then
     PUPPET_RUN_CONFIG_PATH=/etc/sysconfig/puppetserver
 fi
+
 perl -pi -e "s#(?<=-Xm[sx])[^ ]+#$PUPPET_MEMORY_USAGE#g" "$PUPPET_RUN_CONFIG_PATH"
+/opt/puppetlabs/bin/puppetserver ca setup
 
 /opt/puppetlabs/bin/puppet module install puppet-r10k
 /opt/puppetlabs/bin/puppet apply manifests/r10k.pp

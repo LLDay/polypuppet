@@ -18,11 +18,10 @@ def setup_server():
     puppet.config('autosign', AUTOSIGN_PATH.as_posix(), section='server')
     puppet.config('certname', certname, section='server')
     puppet.config('server', server_name, section='server')
+    puppet.service('puppetserver')
     config['SSLDIR'] = puppet.config('ssldir')
 
     puppetserver = PuppetServer()
-    puppetserver.setup()
-    puppet.service('puppetserver')
     puppetserver.generate(POLYPUPPET_PEM_NAME)
 
 

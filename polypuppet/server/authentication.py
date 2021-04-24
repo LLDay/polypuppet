@@ -34,7 +34,9 @@ def authenticate(username, password):
     person.first_name = person_json['first_name']
     person.last_name = person_json['last_name']
     person.middle_name = person_json['middle_name']
-    person.group = person_json['structure'][0]['sub_dep']
+
+    group_info = person_json['structure'][0]['sub_dep']
+    person.flow, person.group = group_info.split('/')
     if person_json['structure'][0]['type'] == 'Студент':
         person.type = PersonType.STUDENT
     return person

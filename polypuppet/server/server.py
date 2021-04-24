@@ -38,9 +38,12 @@ class Server:
         response.type = proto.RESPONSE
 
         if message.type == proto.LOGIN:
-            certname = await self.login(message.username, message.password)
-            if certname is not None:
-                response.certname = certname
+            person = await self.login(message.username, message.password)
+            if person.valid():
+                print('certname', person.certname())
+                response.certname = person.certname()
+                response.profile.flow = person.flow
+                response.profile.group = person.group
                 response.ok = True
         await self._answer(writer, response)
 
@@ -57,16 +60,11 @@ class Server:
 
     async def login(self, username, password):
         person = authenticate(username, password)
-        if not person.valid():
-            return
-        certname = ''
-        if person.type == PersonType.STUDENT:
-            certname += 'student.'
-            certname += person.group.replace('/', '.') + '.'
-        certname += username.split('@')[0]
-        self.puppetserver.clear_certname(certname)
-        self.certlist.append(certname)
-        return certname
+        if person.valid():
+            certname = person.certname()
+            self.puppetserver.clear_certname(certname)
+            self.certlist.append(certname)
+        return person
 
     def get_ssl_context(self):
         ssldir = pathlib.Path(self.config['SSLDIR'])

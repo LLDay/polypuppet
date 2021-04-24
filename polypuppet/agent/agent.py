@@ -14,7 +14,7 @@ from polypuppet.messages import error
 
 class Agent:
     def __init__(self):
-        self._config = Config()
+        self.config = Config()
 
     async def _connect(self, ip, port, message):
         ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
@@ -43,12 +43,12 @@ class Agent:
 
     def connect_lan(self, message):
         ip = 'localhost'
-        port = self._config['CONTROL_PORT']
+        port = self.config['CONTROL_PORT']
         return asyncio.run(self._connect(ip, port, message))
 
     def connect_wan(self, message):
-        ip = self._config['SERVER_DOMAIN']
-        port = self._config['SERVER_PORT']
+        ip = self.config['SERVER_DOMAIN']
+        port = self.config['SERVER_PORT']
         return asyncio.run(self._connect(ip, port, message))
 
     def autosign(self, certname):
@@ -65,6 +65,9 @@ class Agent:
         message.password = password
         response = self.connect_wan(message)
         if response.ok:
+            self.config['AUDIENCE'] = response.profile.audience
+            self.config['STUDENT_FLOW'] = response.profile.flow
+            self.config['STUDENT_GROUP'] = response.profile.group
             puppet = Puppet()
             puppet.certname(response.certname)
             puppet.sync(noop=True)

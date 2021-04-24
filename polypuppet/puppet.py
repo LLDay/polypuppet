@@ -73,8 +73,5 @@ class PuppetServer(PuppetBase):
     def generate(self, certname):
         return self._run('ca generate --certname', certname)
 
-    def setup(self):
-        return self._run('ca setup')
-
     def clear_certname(self, certname):
         return self._run('ca clean --certname', certname)

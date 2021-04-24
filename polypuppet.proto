@@ -1,18 +1,25 @@
 syntax = 'proto3';
 
+message Profile {
+    string flow     = 1;
+    string group    = 2;
+    string audience = 3;
+}
+
 enum MessageType {
-    UNKNOWN = 0;
-    STOP = 1;
+    UNKNOWN  = 0;
+    STOP     = 1;
     AUTOSIGN = 2;
-    LOGIN = 3;
+    LOGIN    = 3;
     RESPONSE = 4;
-};
+}
 
 message Message {
     MessageType type = 1;
-    string username = 2;
-    string password = 3;
-    string certname = 4;
-    string output = 5;
-    bool ok = 6;
+    Profile profile  = 2;
+    bool ok          = 3;
+    string username  = 4;
+    string password  = 5;
+    string certname  = 6;
+    string output    = 7;
 }
