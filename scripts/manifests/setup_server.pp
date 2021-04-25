@@ -1,5 +1,5 @@
 $deploy_settings = {
-  'purge_whitelist' => ['modules/polypuppet'],
+  'purge_allowlist' => ['modules/polypuppet'],
 }
 
 class { 'r10k':
@@ -9,9 +9,10 @@ class { 'r10k':
   deploy_settings => $deploy_settings,
   sources         => {
     'puppet' => {
-      'basedir' => "${::settings::environmentpath}",
+      'basedir' => $::settings::environmentpath,
       'remote'  => 'https://github.com/LLDay/polypuppet',
       'prefix'  => false,
     }
   }
 }
+

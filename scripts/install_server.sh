@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 SERVER_DOMAIN=$(polypuppet config server_domain)
-SERVER_CERTNAME=$(polypuppet config server_certname)
 PUPPET_MEMORY_USAGE=256m
 
 if [ ! -f /opt/puppetlabs/server/bin/puppetserver ]; then
@@ -10,7 +9,7 @@ if [ ! -f /opt/puppetlabs/server/bin/puppetserver ]; then
         apt-get -y install puppetserver
     elif which yum; then
         CENTOS_VER=$(rpm --eval "%{centos_ver}")
-        rpm -Uvh https://yum.puppet.com/$PUPPET_VERSION-el-$CENTOS_VER.noarch.rpm
+        rpm -Uvh "https://yum.puppet.com/$PUPPET_VERSION-el-$CENTOS_VER.noarch.rpm"
         yum install -y puppetserver
     fi
 fi
@@ -26,5 +25,5 @@ perl -pi -e "s#(?<=-Xm[sx])[^ ]+#$PUPPET_MEMORY_USAGE#g" "$PUPPET_RUN_CONFIG_PAT
 /opt/puppetlabs/bin/puppetserver ca setup
 
 /opt/puppetlabs/bin/puppet module install puppet-r10k
-/opt/puppetlabs/bin/puppet apply manifests/r10k.pp
+/opt/puppetlabs/bin/puppet apply ./scripts/manifests/setup_server.pp
 r10k deploy environment -pv

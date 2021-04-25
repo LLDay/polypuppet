@@ -16,8 +16,8 @@ def setup_server():
     puppet.service('puppetserver', ensure=False)
 
     puppet.config('autosign', AUTOSIGN_PATH.as_posix(), section='server')
-    puppet.config('certname', certname, section='server')
-    puppet.config('server', server_name, section='server')
+    puppet.config('certname', certname, section='main')
+    puppet.config('server', server_name, section='main')
     puppet.service('puppetserver')
     config['SSLDIR'] = puppet.config('ssldir')
 
