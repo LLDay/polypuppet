@@ -25,5 +25,6 @@ perl -pi -e "s#(?<=-Xm[sx])[^ ]+#$PUPPET_MEMORY_USAGE#g" "$PUPPET_RUN_CONFIG_PAT
 /opt/puppetlabs/bin/puppetserver ca setup
 
 /opt/puppetlabs/bin/puppet module install puppet-r10k
+/opt/puppetlabs/bin/puppet module install puppetlabs-hocon
 /opt/puppetlabs/bin/puppet apply ./scripts/manifests/setup_server.pp
 r10k deploy environment -pv

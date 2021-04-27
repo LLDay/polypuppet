@@ -16,3 +16,11 @@ class { 'r10k':
   }
 }
 
+hocon_setting { 'ca.conf allow-subject-alt-names':
+  ensure  => present,
+  path    => '/etc/puppetlabs/puppetserver/conf.d/ca.conf',
+  setting => 'certificate-authority.allow-subject-alt-names',
+  value   => true,
+  type    => 'boolean',
+}
+
