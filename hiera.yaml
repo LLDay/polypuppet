@@ -1,0 +1,21 @@
+---
+version: 5
+defaults:
+  datadir: data
+  data_hash: yaml_data
+
+hierarchy:
+  - name: "Specific node data"
+    path: "nodes/%{trusted.certname}.yaml"
+
+  - name: "Students flow data"
+    path: "groups/%{facts.student_flow}.yaml"
+
+  - name: "Students group data"
+    path: "groups/%{facts.student_flow}/%{facts.student_group}.yaml"
+
+  - name: "Audience data"
+    path: "audience/${facts.audience}"
+
+  - name: "Common data"
+    path: "common.yaml"
