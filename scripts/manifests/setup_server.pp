@@ -1,3 +1,8 @@
+class { 'python':
+  version => 'system',
+  pip     => 'present',
+}
+
 $deploy_settings = {
   'purge_allowlist' => ['modules/polypuppet'],
 }
@@ -23,4 +28,3 @@ hocon_setting { 'ca.conf allow-subject-alt-names':
   value   => true,
   type    => 'boolean',
 }
-

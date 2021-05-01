@@ -7,4 +7,6 @@ if which apt-get; then
     apt-get -y install puppet-agent
 fi
 
+/opt/puppetlabs/bin/puppet module install puppet-python
 /opt/puppetlabs/bin/puppet config set --section agent server "$SERVER_DOMAIN"
+/opt/puppetlabs/bin/puppet apply ./scripts/manifests/setup_agent.pp
