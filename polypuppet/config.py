@@ -1,5 +1,6 @@
 import configparser
-from polypuppet.definitions import CONFIG_PATH
+
+from polypuppet.definitions import CONFIG_PATH, POLYPUPPET_PEM_NAME
 from polypuppet.messages import error
 
 
@@ -27,11 +28,13 @@ class Config:
 
     def load(self):
         default_config = configparser.ConfigParser()
+
         default_config['server'] = {
             'SERVER_DOMAIN': 'server.poly.puppet.com',
             'SERVER_CERTNAME': 'server.poly.puppet.com',
             'SERVER_PORT': 8668}
         default_config['agent'] = {
+            'AGENT_CERTNAME': '',
             'CONTROL_PORT': 8668,
             'CERT_WAITTIME': 90,
             'ENABLE': False}
@@ -40,14 +43,19 @@ class Config:
             'STUDENT_FLOW': '',
             'STUDENT_GROUP': ''}
         default_config['cache'] = {
-            'SSLDIR': '/etc/puppetlabs/puppet/ssl'}
+            'SSLDIR': '',
+            'SSL_CERT': '',
+            'SSL_PRIVATE': '',
+            'CONFDIR': CONFIG_PATH.parent}
 
         if CONFIG_PATH.exists():
             read_config = configparser.ConfigParser()
             read_config.read(CONFIG_PATH)
-            for k, v in read_config.items():
-                if k in default_config:
-                    default_config[k] = v
+            for section in default_config:
+                for option in default_config[section]:
+                    if read_config.has_option(section, option):
+                        default_config[section][option] = read_config[section][option]
+
         self.config = default_config
 
         self.flat = {}

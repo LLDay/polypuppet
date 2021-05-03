@@ -1,12 +1,10 @@
 import asyncio
-import multiprocessing as mp
-import os
+import pathlib
 import socket
 import ssl
 
 from polypuppet import proto
 from polypuppet.definitions import EOF_SIGN
-from polypuppet.server import server
 from polypuppet.config import Config
 from polypuppet.puppet import Puppet
 from polypuppet.messages import error
@@ -51,6 +49,23 @@ class Agent:
         port = self.config['SERVER_PORT']
         return asyncio.run(self._connect(ip, port, message))
 
+    def on_login(self, response):
+        self.config['AUDIENCE'] = response.profile.audience
+        self.config['STUDENT_FLOW'] = response.profile.flow
+        self.config['STUDENT_GROUP'] = response.profile.group
+
+        puppet = Puppet()
+        puppet.certname(response.certname)
+        puppet.sync(noop=True)
+
+    def setup_certname(self, certname):
+        ssldir = pathlib.Path(self.config['SSLDIR'])
+        ssl_cert = ssldir / ('certs/' + certname + '.pem')
+        ssl_private = ssldir / ('private_keys/' + certname + '.pem')
+        self.config['AGENT_CERTNAME'] = certname
+        self.config['SSL_CERT'] = ssl_cert.as_posix()
+        self.config['SSL_PRIVATE'] = ssl_private.as_posix()
+
     def autosign(self, certname):
         message = proto.Message()
         message.type = proto.AUTOSIGN
@@ -65,12 +80,8 @@ class Agent:
         message.password = password
         response = self.connect_wan(message)
         if response.ok:
-            self.config['AUDIENCE'] = response.profile.audience
-            self.config['STUDENT_FLOW'] = response.profile.flow
-            self.config['STUDENT_GROUP'] = response.profile.group
-            puppet = Puppet()
-            puppet.certname(response.certname)
-            puppet.sync(noop=True)
+            self.on_login(response)
+            self.setup_certname(response.certname)
         return response.ok
 
     def stop_server(self):
