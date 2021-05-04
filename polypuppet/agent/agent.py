@@ -56,16 +56,21 @@ class Agent:
         port = self.config['SERVER_PORT']
         return asyncio.run(self._connect(ip, port, message))
 
-    def set_token(self, token=None):
+    def _token_action(self, action):
         message = proto.Message()
         message.type = proto.TOKEN
-        if token is not None:
-            message.taction = proto.SET
-            message.token = token
-        else:
-            message.taction = proto.NEW
+        message.taction = action
         response = self.connect_lan(message)
         return response.token
+
+    def get_token(self):
+        return self._token_action(proto.GET)
+
+    def clear_token(self):
+        return self._token_action(proto.CLEAR)
+
+    def update_token(self):
+        return self._token_action(proto.NEW)
 
     def autosign(self, certname):
         message = proto.Message()
@@ -84,12 +89,12 @@ class Agent:
         ssl_cert = ssldir / ('certs/' + certname + '.pem')
         ssl_private = ssldir / ('private_keys/' + certname + '.pem')
 
-        self.config['AUDIENCE'] = str(response.profile.audience)
-        self.config['STUDENT_FLOW'] = response.profile.flow
-        self.config['STUDENT_GROUP'] = response.profile.group
         self.config['AGENT_CERTNAME'] = certname
+        self.config['AUDIENCE'] = str(response.profile.audience)
         self.config['SSL_CERT'] = ssl_cert.as_posix()
         self.config['SSL_PRIVATE'] = ssl_private.as_posix()
+        self.config['STUDENT_FLOW'] = response.profile.flow
+        self.config['STUDENT_GROUP'] = response.profile.group
 
         puppet = Puppet()
         puppet.certname(response.certname)

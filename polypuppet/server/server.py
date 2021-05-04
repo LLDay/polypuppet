@@ -1,6 +1,5 @@
 import asyncio
 import pathlib
-import secrets
 import socket
 import ssl
 import warnings
@@ -14,6 +13,7 @@ from polypuppet.server.audience import Audience
 from polypuppet.server.authentication import authenticate
 from polypuppet.server.cert_list import CertList
 from polypuppet.server.person import PersonType
+from polypuppet.server.token import Token
 
 
 class Server:
@@ -22,7 +22,7 @@ class Server:
         self.puppet = Puppet()
         self.puppetserver = PuppetServer()
         self.certlist = CertList()
-        self.token = self.config['TOKEN']
+        self.token = Token()
 
     async def _read_message(self, reader):
         raw_message = await reader.readuntil(EOF_SIGN)
@@ -116,22 +116,15 @@ class Server:
         info.request_for_cert(certname, response.ok)
         return response
 
-    def set_token(self, token):
-        self.token = token
-        self.config['TOKEN'] = token
-        return token
-
-    def new_token(self):
-        token = secrets.token_hex(20)
-        return self.set_token(token)
-
     def _handle_token(self, taction, token):
         response = proto.Message()
         response.ok = True
-        if taction == proto.NEW:
-            response.token = self.new_token()
-        elif taction == proto.SET:
-            response.token == self.set_token(token)
+        if taction == proto.GET:
+            response.token = self.token.get()
+        elif taction == proto.NEW:
+            response.token = self.token.new()
+        elif taction == proto.CLEAR:
+            response.token == self.token.clear()
         return response
 
     #

@@ -27,6 +27,9 @@ class _InfoEn:
     def cannot_create_config_file(self):
         print('Cannot change config file because of low permissions')
 
+    def cannot_create_token_file(self):
+        print('Cannot create token file because of low permissions')
+
     def cannot_connect_to_cas(self):
         print('Cannot connect to the CAS')
 

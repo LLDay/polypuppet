@@ -112,12 +112,12 @@ def token(new, clear):
     agent = Agent()
     config = Config()
     if clear:
-        token = agent.set_token('')
+        token = agent.clear_token()
     elif new:
-        token = agent.set_token()
+        token = agent.update_token()
         print(token)
     else:
-        token = config['TOKEN']
+        token = agent.get_token()
         if token == str():
             error.token_not_generated()
         print(token)

@@ -1,6 +1,6 @@
 import configparser
 
-from polypuppet.definitions import CONFIG_PATH, POLYPUPPET_PEM_NAME
+from polypuppet.definitions import CONFIG_DIR, CONFIG_PATH, POLYPUPPET_PEM_NAME
 from polypuppet.messages import error
 
 
@@ -10,13 +10,13 @@ class Config:
         return self.flat[value]
 
     def __setitem__(self, key, value):
-        for k in self.config:
+        for k in ['server', 'agent']:
             if key in self.config[k]:
                 self.flat[key] = value
                 self.config[k][key] = value
 
         try:
-            CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+            CONFIG_DIR.mkdir(parents=True, exist_ok=True)
             CONFIG_PATH.touch(exist_ok=True)
             with open(CONFIG_PATH, 'w') as configfile:
                 self.config.write(configfile)
@@ -32,8 +32,7 @@ class Config:
         default_config['server'] = {
             'SERVER_DOMAIN': 'server.poly.puppet.com',
             'SERVER_CERTNAME': 'server.poly.puppet.com',
-            'SERVER_PORT': 8668,
-            'TOKEN': ''}
+            'SERVER_PORT': 8668}
         default_config['agent'] = {
             'AGENT_CERTNAME': '',
             'CONTROL_PORT': 8668,
@@ -47,7 +46,7 @@ class Config:
             'SSLDIR': '',
             'SSL_CERT': '',
             'SSL_PRIVATE': '',
-            'CONFDIR': CONFIG_PATH.parent}
+            'CONFDIR': CONFIG_DIR}
 
         if CONFIG_PATH.exists():
             read_config = configparser.ConfigParser()
