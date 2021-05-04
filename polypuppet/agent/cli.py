@@ -23,7 +23,7 @@ def autosign(certname):
     agent = Agent()
     has_certname = agent.autosign(certname)
     if not has_certname:
-        exit(1)
+        os.exit(1)
 
 
 @cli.command()
@@ -43,8 +43,25 @@ def login(username, password):
 
 
 @cli.command()
+@click.argument('number', required=True, type=click.INT)
+@click.argument('token', required=True, type=click.STRING)
+def audience(number, token):
+    agent = Agent()
+    response = agent.audience(number, token)
+    if response:
+        info.logged_in()
+    else:
+        error.not_logged_in()
+
+
+@cli.command()
 @click.option('-d', '--daemon', is_flag=True, default=False)
-def server(daemon):
+@click.option('-r', '--restart', is_flag=True, default=False)
+def server(daemon, restart):
+    if restart:
+        agent = Agent()
+        agent.stop_server()
+
     if daemon:
         process = mp.Process(target=server_main)
         process.start()
@@ -86,6 +103,24 @@ def setup(what):
         setup_server()
     elif what == 'agent':
         setup_agent()
+
+
+@cli.command()
+@click.option('--new', '-n', is_flag=True)
+@click.option('--clear', '-c', is_flag=True)
+def token(new, clear):
+    agent = Agent()
+    config = Config()
+    if clear:
+        token = agent.set_token('')
+    elif new:
+        token = agent.set_token()
+        print(token)
+    else:
+        token = config['TOKEN']
+        if token == str():
+            error.token_not_generated()
+        print(token)
 
 
 if __name__ == "__main__":

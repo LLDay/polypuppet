@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-SERVER_DOMAIN=$(polypuppet config server_domain)
 PUPPET_MEMORY_USAGE=256m
 
 if [ ! -f /opt/puppetlabs/server/bin/puppetserver ]; then

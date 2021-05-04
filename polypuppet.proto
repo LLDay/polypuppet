@@ -1,9 +1,19 @@
 syntax = 'proto3';
 
 message Profile {
-    string flow     = 1;
-    string group    = 2;
-    string audience = 3;
+    string username = 1;
+    string password = 2;
+    string flow     = 3;
+    string group    = 4;
+    uint32 audience = 5;
+    string platform = 6;
+    string release  = 7;
+    uint64 uuid     = 8;
+}
+
+enum TokenAction {
+    NEW     = 0;
+    SET     = 1;
 }
 
 enum MessageType {
@@ -12,14 +22,16 @@ enum MessageType {
     AUTOSIGN = 2;
     LOGIN    = 3;
     RESPONSE = 4;
+    TOKEN    = 5;
 }
 
 message Message {
-    MessageType type = 1;
-    Profile profile  = 2;
-    bool ok          = 3;
-    string username  = 4;
-    string password  = 5;
-    string certname  = 6;
-    string output    = 7;
+    MessageType type    = 1;
+    Profile profile     = 2;
+    TokenAction taction = 3;
+    bool ok             = 4;
+
+    string certname     = 5;
+    string token        = 6;
+    string output       = 7;
 }

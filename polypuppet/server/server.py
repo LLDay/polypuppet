@@ -1,16 +1,19 @@
 import asyncio
 import pathlib
+import secrets
 import socket
 import ssl
+import warnings
 
 from polypuppet import proto
 from polypuppet import Config
 from polypuppet import PuppetServer, Puppet
 from polypuppet.definitions import POLYPUPPET_PEM_NAME, EOF_SIGN
 from polypuppet.messages import info, error
-from polypuppet.server.person import PersonType
-from polypuppet.server.cert_list import CertList
+from polypuppet.server.audience import Audience
 from polypuppet.server.authentication import authenticate
+from polypuppet.server.cert_list import CertList
+from polypuppet.server.person import PersonType
 
 
 class Server:
@@ -19,52 +22,121 @@ class Server:
         self.puppet = Puppet()
         self.puppetserver = PuppetServer()
         self.certlist = CertList()
+        self.token = self.config['TOKEN']
 
     async def _read_message(self, reader):
         raw_message = await reader.readuntil(EOF_SIGN)
         raw_message = raw_message[:-len(EOF_SIGN)]
         message = proto.Message()
-        message.ParseFromString(raw_message)
+        with warnings.catch_warnings():
+            try:
+                message.ParseFromString(raw_message)
+            except:
+                pass
         return message
 
     async def _answer(self, writer, response):
+        response.type == proto.RESPONSE
         writer.write(response.SerializeToString())
         writer.write(EOF_SIGN)
         await writer.drain()
 
+    #
+    # Agent connection handlers
+    #
+
     async def agent_message_handler(self, reader, writer):
         message = await self._read_message(reader)
         response = proto.Message()
-        response.type = proto.RESPONSE
 
         if message.type == proto.LOGIN:
-            person = await self.login(message.username, message.password)
-            if person.valid():
-                print('certname', person.certname())
-                response.certname = person.certname()
-                response.profile.flow = person.flow
-                response.profile.group = person.group
-                response.ok = True
+            response = self._handle_login(message)
+
         await self._answer(writer, response)
+
+    def _handle_login(self, message):
+        profile = message.profile
+        if profile.username != str():
+            return self._handle_user_login(profile.username, profile.password)
+        elif profile.audience != 0:
+            return self._handle_audience_login(profile, message.token)
+        else:
+            return proto.Message()
+
+    def wait_for_certificate(self, certname):
+        self.puppetserver.clear_certname(certname)
+        self.certlist.append(certname)
+        info.wait_for_cert(certname)
+
+    def _handle_user_login(self, username, password):
+        response = proto.Message()
+        person = authenticate(username, password)
+        if person.valid():
+            certname = person.certname()
+            print('certname', certname)
+            response.certname = certname
+            response.profile.flow = person.flow
+            response.profile.group = person.group
+            response.ok = True
+            self.wait_for_certificate(certname)
+        return response
+
+    def _handle_audience_login(self, profile, token):
+        response = proto.Message()
+        if len(token) > 0 and token == self.token:
+            audience = Audience(profile.audience, profile.platform,
+                                profile.release, profile.uuid)
+            certname = audience.certname()
+            response.ok = True
+            response.certname = certname
+            response.profile.audience = profile.audience
+            self.wait_for_certificate(certname)
+        return response
+
+    #
+    # Control connection handlers
+    #
 
     async def control_message_handler(self, reader, writer):
         message = await self._read_message(reader)
         response = proto.Message()
-        response.type = proto.RESPONSE
 
         if message.type == proto.AUTOSIGN:
-            response.ok = self.certlist.check_and_remove(message.certname)
+            response = self._handle_autosign(message.certname)
+        elif message.type == proto.TOKEN:
+            response = self._handle_token(message.taction, message.token)
         elif message.type == proto.STOP:
             await self.stop()
+
         await self._answer(writer, response)
 
-    async def login(self, username, password):
-        person = authenticate(username, password)
-        if person.valid():
-            certname = person.certname()
-            self.puppetserver.clear_certname(certname)
-            self.certlist.append(certname)
-        return person
+    def _handle_autosign(self, certname):
+        response = proto.Message()
+        response.ok = self.certlist.check_and_remove(certname)
+        info.request_for_cert(certname, response.ok)
+        return response
+
+    def set_token(self, token):
+        self.token = token
+        self.config['TOKEN'] = token
+        return token
+
+    def new_token(self):
+        token = secrets.token_hex(20)
+        return self.set_token(token)
+
+    def _handle_token(self, taction, token):
+        response = proto.Message()
+        response.ok = True
+        if taction == proto.NEW:
+            response.token = self.new_token()
+        elif taction == proto.SET:
+            response.token == self.set_token(token)
+        return response
+
+    #
+    # SSL setup
+    #
 
     def get_ssl_context(self):
         ssldir = pathlib.Path(self.config['SSLDIR'])
@@ -87,6 +159,10 @@ class Server:
             error.server_cannot_bind(ip, port, e)
         wrapper = ssl_context.wrap_socket(sock, server_side=True)
         return await asyncio.start_server(handler, sock=wrapper)
+
+    #
+    # Execution control
+    #
 
     async def run(self):
         server_ip = self.config['SERVER_DOMAIN']

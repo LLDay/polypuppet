@@ -44,6 +44,9 @@ class _InfoEn:
         else:
             print('This certname is not presented')
 
+    def server_generated_token(token):
+        print('Server has generated token', token)
+
     def server_cannot_bind(self, ip, port, why):
         print('Server cannot bind', ip, 'with port', port)
         print(why)
@@ -53,6 +56,12 @@ class _InfoEn:
 
     def must_call_setup_server(self):
         print('You must call "polypuppet setup server" first')
+
+    def cannot_request_token(self):
+        print('Cannot request token. No server runs on local machine')
+
+    def token_not_generated(self):
+        print("Token has not been generated. Call 'polypuppet token --new' first")
 
 
 class _Error(_InfoEn):

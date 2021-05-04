@@ -32,7 +32,8 @@ class Config:
         default_config['server'] = {
             'SERVER_DOMAIN': 'server.poly.puppet.com',
             'SERVER_CERTNAME': 'server.poly.puppet.com',
-            'SERVER_PORT': 8668}
+            'SERVER_PORT': 8668,
+            'TOKEN': ''}
         default_config['agent'] = {
             'AGENT_CERTNAME': '',
             'CONTROL_PORT': 8668,
