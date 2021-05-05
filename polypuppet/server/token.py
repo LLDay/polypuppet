@@ -23,6 +23,9 @@ class Token:
             tokenfile.write(self.token)
         os.chmod(TOKEN_PATH, 0o600)
 
+    def empty(self):
+        return self.token == str()
+
     def get(self):
         return self.token
 

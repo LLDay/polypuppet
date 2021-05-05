@@ -91,6 +91,7 @@ class Agent:
 
         self.config['AGENT_CERTNAME'] = certname
         self.config['AUDIENCE'] = str(response.profile.audience)
+        self.config['ROLE'] = proto.Role.Name(response.profile.role).lower()
         self.config['SSL_CERT'] = ssl_cert.as_posix()
         self.config['SSL_PRIVATE'] = ssl_private.as_posix()
         self.config['STUDENT_FLOW'] = response.profile.flow

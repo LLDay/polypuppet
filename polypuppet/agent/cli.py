@@ -88,12 +88,10 @@ def config(key, value, keys_only):
     elif key is None:
         for k, v in config.all().items():
             print(k + '=' + v)
-    elif key not in config:
-        error.no_config_key(key)
     elif value is None:
         print(config[key])
     else:
-        config[key] = value
+        config.restricted_set(key, value)
 
 
 @cli.command()

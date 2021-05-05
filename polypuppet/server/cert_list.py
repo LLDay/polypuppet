@@ -11,11 +11,11 @@ class CertList:
 
     async def _certname_stopwatch(self, certname):
         await asyncio.sleep(self.timeout)
-        info.stop_waiting_for_cert(certname)
         self.remove(certname)
 
     def remove(self, certname):
         if certname in self.certlist:
+        info.stop_waiting_for_cert(certname)
             self.certlist.remove(certname)
 
     def append(self, certname):

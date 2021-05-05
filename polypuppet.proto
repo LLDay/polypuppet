@@ -1,14 +1,22 @@
 syntax = 'proto3';
 
+enum Role {
+    ADMIN = 0;
+    AUDIENCE = 1;
+    OTHER = 2;
+    STUDENT = 3;
+}
+
 message Profile {
-    string username = 1;
-    string password = 2;
-    string flow     = 3;
-    string group    = 4;
-    uint32 audience = 5;
-    string platform = 6;
-    string release  = 7;
-    uint64 uuid     = 8;
+    Role role       = 1;
+    string username = 2;
+    string password = 3;
+    string flow     = 4;
+    string group    = 5;
+    uint32 audience = 6;
+    string platform = 7;
+    string release  = 8;
+    uint64 uuid     = 9;
 }
 
 enum TokenAction {

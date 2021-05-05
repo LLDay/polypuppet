@@ -17,6 +17,9 @@ class _InfoEn:
     def no_config_key(self, key):
         print('There is no key', key)
 
+    def cannot_change_key(self, key):
+        print('You cannot explicitly change key', key)
+
     def puppet_exec_no_exit(self, executable_name):
         print('Exetuable does not exist:', executable_name)
         print('You should install it first')
@@ -43,7 +46,6 @@ class _InfoEn:
         print('Puppetserver requested for', certname)
         if presented:
             print('This certname is presented')
-            self.stop_waiting_for_cert(certname)
         else:
             print('This certname is not presented')
 

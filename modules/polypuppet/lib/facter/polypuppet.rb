@@ -3,6 +3,14 @@ require('facter')
 Facter.add('polypuppet') do
   confine {Facter::Core::Execution.which('polypuppet')}
   setcode do
-    Facter::Core::Execution.execute('polypuppet config')
+    configs = Facter::Core::Execution.execute('polypuppet config')
+
+    result = {}
+    configs.each_line do |line|
+      key, value = line.split('=')
+      result[key] = value.strip()
+    end
+
+    result
   end
 end

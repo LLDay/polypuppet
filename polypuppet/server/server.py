@@ -66,29 +66,34 @@ class Server:
     def wait_for_certificate(self, certname):
         self.puppetserver.clear_certname(certname)
         self.certlist.append(certname)
-        info.wait_for_cert(certname)
 
     def _handle_user_login(self, username, password):
         response = proto.Message()
         person = authenticate(username, password)
         if person.valid():
             certname = person.certname()
-            print('certname', certname)
+            response.ok = True
             response.certname = certname
             response.profile.flow = person.flow
             response.profile.group = person.group
-            response.ok = True
+
+            if person.type == PersonType.STUDENT:
+                response.profile.role = proto.STUDENT
+            else:
+                response.profile.role = proto.OTHER
+
             self.wait_for_certificate(certname)
         return response
 
     def _handle_audience_login(self, profile, token):
         response = proto.Message()
-        if len(token) > 0 and token == self.token:
+        if not self.token.empty() and token == self.token:
             audience = Audience(profile.audience, profile.platform,
                                 profile.release, profile.uuid)
             certname = audience.certname()
             response.ok = True
             response.certname = certname
+            response.profile.role = proto.AUDIENCE
             response.profile.audience = profile.audience
             self.wait_for_certificate(certname)
         return response
@@ -113,7 +118,6 @@ class Server:
     def _handle_autosign(self, certname):
         response = proto.Message()
         response.ok = self.certlist.check_and_remove(certname)
-        info.request_for_cert(certname, response.ok)
         return response
 
     def _handle_token(self, taction, token):
@@ -124,7 +128,7 @@ class Server:
         elif taction == proto.NEW:
             response.token = self.token.new()
         elif taction == proto.CLEAR:
-            response.token == self.token.clear()
+            self.token.clear()
         return response
 
     #

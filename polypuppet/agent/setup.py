@@ -31,3 +31,4 @@ def setup_agent():
     server_name = config['SERVER_DOMAIN']
     puppet.config('server', server_name, section='agent')
     puppet.service('puppet', ensure=False, enable=False)
+    config['SSLDIR'] = puppet.config('ssldir')

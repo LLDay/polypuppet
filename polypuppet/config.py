@@ -5,12 +5,14 @@ from polypuppet.messages import error
 
 
 class Config:
-    def __getitem__(self, value):
-        value = str(value).lower()
-        return self.flat[value]
+    def __getitem__(self, key):
+        key = str(key).lower()
+        if key not in self.flat:
+            error.no_config_key(key)
+        return self.flat[key]
 
     def __setitem__(self, key, value):
-        for k in ['server', 'agent']:
+        for k in self.config:
             if key in self.config[k]:
                 self.flat[key] = value
                 self.config[k][key] = value
@@ -26,20 +28,32 @@ class Config:
     def __contains__(self, key):
         return key in self.flat
 
+    def restricted_set(self, key, value):
+        for k in ['agent', 'server']:
+            if key in self.config[k]:
+                self[key] = value
+                return
+
+        if key not in self.flat:
+            error.no_config_key(key)
+        else:
+            error.cannot_change_key(key)
+
     def load(self):
         default_config = configparser.ConfigParser()
 
         default_config['server'] = {
             'SERVER_DOMAIN': 'server.poly.puppet.com',
             'SERVER_CERTNAME': 'server.poly.puppet.com',
-            'SERVER_PORT': 8668}
+            'SERVER_PORT': 8139}
         default_config['agent'] = {
             'AGENT_CERTNAME': '',
-            'CONTROL_PORT': 8668,
+            'CONTROL_PORT': 8139,
             'CERT_WAITTIME': 90,
             'ENABLE': False}
         default_config['profile'] = {
             'AUDIENCE': '',
+            'ROLE': '',
             'STUDENT_FLOW': '',
             'STUDENT_GROUP': ''}
         default_config['cache'] = {
