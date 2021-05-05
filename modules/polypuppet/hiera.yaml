@@ -1,0 +1,12 @@
+---
+version: 5
+defaults:
+  datadir: data
+  data_hash: yaml_data
+
+hierarchy:
+  - name: "OS specific parameters"
+    path: "%{facts.os.family} params.yaml"
+
+  - name: "Default parameters"
+    path: "default params.yaml"

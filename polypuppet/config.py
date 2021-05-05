@@ -44,19 +44,18 @@ class Config:
 
         default_config['server'] = {
             'SERVER_DOMAIN': 'server.poly.puppet.com',
-            'SERVER_CERTNAME': 'server.poly.puppet.com',
             'SERVER_PORT': 8139}
         default_config['agent'] = {
-            'AGENT_CERTNAME': '',
             'CONTROL_PORT': 8139,
             'CERT_WAITTIME': 90,
-            'ENABLE': False}
+            'ENABLED': False}
         default_config['profile'] = {
             'AUDIENCE': '',
             'ROLE': '',
             'STUDENT_FLOW': '',
             'STUDENT_GROUP': ''}
         default_config['cache'] = {
+            'AGENT_CERTNAME': '',
             'SSLDIR': '',
             'SSL_CERT': '',
             'SSL_PRIVATE': '',

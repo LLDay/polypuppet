@@ -11,12 +11,10 @@ def setup_server():
     config = Config()
     puppet = Puppet()
     server_name = config['SERVER_DOMAIN']
-    certname = config['SERVER_CERTNAME']
 
     puppet.service('puppetserver', ensure=False)
-
     puppet.config('autosign', AUTOSIGN_PATH.as_posix(), section='server')
-    puppet.config('certname', certname, section='main')
+    puppet.config('certname', server_name, section='main')
     puppet.config('server', server_name, section='main')
     puppet.service('puppetserver')
     config['SSLDIR'] = puppet.config('ssldir')

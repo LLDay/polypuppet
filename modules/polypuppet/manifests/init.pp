@@ -1,23 +1,19 @@
 class polypuppet (
-  $audience        = undef,
-  $student_flow    = undef,
-  $student_group   = undef,
+  Boolean $enabled,
+  Integer $cert_waittime,
+  Integer $control_port,
+  Integer $server_port,
+  String  $confdir,
+  String  $server_domain,
 
-  $cert_waittime   = $polypuppet::params::cert_waittime,
-  $confdir         = $polypuppet::params::confdir,
-  $control_port    = $polypuppet::params::control_port,
-  $enabled         = $polypuppet::params::enabled,
-  $server_certname = $polypuppet::params::server_certname,
-  $server_domain   = $polypuppet::params::server_domain,
-  $server_port     = $polypuppet::params::control_port,
-) inherits polypuppet::params {
-
-  $polypuppet_config_dir = '/etc/polypuppet/'
+  Variant[Integer, Undef] $audience = undef,
+  Variant[String, Undef]  $token    = undef,
+) {
   $polypuppet_config_name = 'polypuppet.ini'
-  $polypuppet_config_path = "${polypuppet_config_dir}${polypuppet_config_name}"
+  $polypuppet_config_path = "${$confdir}${polypuppet_config_name}"
 
   exec { 'create config file':
-    command => "mkdir -p ${polypuppet_config_dir} && touch ${polypuppet_config_path}",
+    command => "mkdir -p ${confdir} && touch ${polypuppet_config_path}",
     creates => $polypuppet_config_path,
     path    => '/usr/bin:/usr/local/bin:/usr/sbin:/bin',
     user    => 'root',
@@ -25,22 +21,24 @@ class polypuppet (
 
   $ini_content = {
     'server'  => {
-      'server_domain'   => $server_domain,
-      'server_certname' => $server_certname,
-      'server_port'     => $server_port,
+      'server_domain' => $server_domain,
+      'server_port'   => $server_port,
     },
     'agent'   => {
       'cert_waittime' => $cert_waittime,
       'control_port'  => $control_port,
       'enabled'       => $enabled,
-    },
-    'profile' => {
-      'audience'      => $audience,
-      'student_flow'  => $student_flow,
-      'student_group' => $student_group,
-    },
+    }
   }
 
-  $ini_path = { 'path' => $confdir }
+  $ini_path = { 'path' => $polypuppet_config_path }
   ::inifile::create_ini_settings($ini_content, $ini_path)
+
+  if $audience != undef and $token != undef {
+    exec { 'setup audience number':
+      command => "polypuppet audience ${audience} ${token}",
+      path    => '/usr/bin:/usr/local/bin:/usr/sbin:/bin',
+      user    => 'root',
+    }
+  }
 }

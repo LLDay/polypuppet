@@ -1,0 +1,11 @@
+---
+# init.pp
+polypuppet::cert_waittime: 90
+polypuppet::confdir: "/etc/polypuppet"
+polypuppet::control_port: 8139
+polypuppet::enabled: false
+polypuppet::server_domain: "server.poly.puppet.com"
+polypuppet::server_port: 8139
+
+# setup.pp
+polypuppet::setup::polypuppet_type: "agent"
