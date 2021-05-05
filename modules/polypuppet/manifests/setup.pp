@@ -1,6 +1,6 @@
 class polypuppet::setup (
   Enum['server', 'agent'] $polypuppet_type = $polypuppet::params::polypuppet_type
-) inherits polypuppet::params {
+) {
 
   package { 'polypuppet':
     ensure   => installed,

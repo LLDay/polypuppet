@@ -95,6 +95,15 @@ def config(key, value, keys_only):
 
 
 @cli.command()
+@click.argument('key', required=True)
+@click.argument('value', required=True)
+def has(key, value):
+    config = Config()
+    if config[key] != value:
+        exit(1)
+
+
+@cli.command()
 @click.argument('what', type=click.Choice(['agent', 'server']), required=True)
 def setup(what):
     if what == 'server':

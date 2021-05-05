@@ -15,7 +15,7 @@ class CertList:
 
     def remove(self, certname):
         if certname in self.certlist:
-        info.stop_waiting_for_cert(certname)
+            info.stop_waiting_for_cert(certname)
             self.certlist.remove(certname)
 
     def append(self, certname):

@@ -47,8 +47,7 @@ class Config:
             'SERVER_PORT': 8139}
         default_config['agent'] = {
             'CONTROL_PORT': 8139,
-            'CERT_WAITTIME': 90,
-            'ENABLED': False}
+            'CERT_WAITTIME': 90}
         default_config['profile'] = {
             'AUDIENCE': '',
             'ROLE': '',
