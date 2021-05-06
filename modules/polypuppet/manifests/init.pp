@@ -38,7 +38,7 @@ class polypuppet (
       command => $hidden_command,
       path    => '/usr/bin:/usr/local/bin:/usr/sbin:/bin',
       user    => 'root',
-      unless  => "polypuppet has audience ${audience}"
+      unless  => "polypuppet config --test audience ${audience}"
     }
   }
 }

@@ -23,7 +23,7 @@ def autosign(certname):
     agent = Agent()
     has_certname = agent.autosign(certname)
     if not has_certname:
-        os.exit(1)
+        exit(1)
 
 
 @cli.command()
@@ -79,28 +79,19 @@ def stop():
 @cli.command()
 @click.argument('key', required=False)
 @click.argument('value', required=False)
-@click.option('-k', '--keys-only', is_flag=True)
-def config(key, value, keys_only):
+@click.option('-t', '--test', is_flag=True)
+def config(key, test, value):
     config = Config()
-    if keys_only:
-        for k in config.all():
-            print(k)
-    elif key is None:
+    if key is None:
         for k, v in config.all().items():
             print(k + '=' + v)
     elif value is None:
         print(config[key])
     else:
-        config.restricted_set(key, value)
-
-
-@cli.command()
-@click.argument('key', required=True)
-@click.argument('value', required=True)
-def has(key, value):
-    config = Config()
-    if config[key] != value:
-        exit(1)
+        if not test:
+            config.restricted_set(key, value)
+        elif config[key] != value:
+            exit(1)
 
 
 @cli.command()
