@@ -8,3 +8,9 @@ polypuppet::server_port: 8139
 
 # setup.pp
 polypuppet::setup::polypuppet_type: "agent"
+polypuppet::setup::server_jvm_min_heap_size: "512m"
+polypuppet::setup::server_jvm_max_heap_size: "512m"
+polypuppet::setup::runmode: "none"
+
+# setup/server.pp
+polypuppet::setup::server::repository: "https://github.com/LLDay/polypuppet"

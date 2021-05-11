@@ -4,11 +4,9 @@ PUPPET_CONF_DIR = '/etc/puppetlabs'
 .PHONY: server agent clean
 
 server:
-	./scripts/install_server.sh
+	./scripts/setup_server.sh
 	python3 -m pip install .
-	polypuppet setup server
 
 agent:
-	./scripts/install_agent.sh
+	./scripts/setup_agent.sh
 	python3 -m pip install .
-	polypuppet setup agent

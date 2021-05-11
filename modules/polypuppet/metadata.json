@@ -1,0 +1,93 @@
+{
+  "name": "llday-polypuppet",
+  "version": "0.1.5",
+  "author": "llday",
+  "summary": "Module for setup polypuppet environment",
+  "license": "Apache-2.0",
+  "source": "https://github.com/LLDay/polypuppet",
+  "project_page": "https://github.com/LLDay/polypuppet",
+  "dependencies": [
+    {
+      "name": "puppetlabs/stdlib",
+      "version_requirement": ">= 5.0.0"
+    },
+    {
+      "name": "puppetlabs/hocon",
+      "version_requirement": ">= 1.1.0 < 2.0.0"
+    },
+    {
+      "name": "puppet/python",
+      "version_requirement": ">= 6.0.0 < 7.0.0"
+    },
+    {
+      "name": "puppet/r10k",
+      "version_requirement": ">= 9.0.0 < 10.0.0"
+    },
+    {
+      "name": "theforeman/foreman",
+      "version_requirement": ">= 17.0.0 < 18.0.0"
+    },
+    {
+      "name": "theforeman/puppet",
+      "version_requirement": ">= 15.0.0 < 16.0.0"
+    },
+    {
+      "name": "theforeman/puppetserver_foreman",
+      "version_requirement": ">= 1.0.0 < 2.0.0"
+    }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "OracleLinux",
+      "operatingsystemrelease": [
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "8"
+      ]
+    },
+    {
+      "operatingsystem": "Scientific",
+      "operatingsystemrelease": [
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "10"
+      ]
+    },
+    {
+      "operatingsystem": "Ubuntu",
+      "operatingsystemrelease": [
+        "18.04"
+      ]
+    },
+    {
+      "operatingsystem": "windows",
+      "operatingsystemrelease": [
+        "2019",
+        "10"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "puppet",
+      "version_requirement": ">= 6.21.0 < 8.0.0"
+    }
+  ],
+  "pdk-version": "2.1.0",
+  "template-url": "pdk-default#2.1.0",
+  "template-ref": "tags/2.1.0-0-ga675ea5"
+}
