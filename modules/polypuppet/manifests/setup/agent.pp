@@ -1,4 +1,4 @@
-class polypuppet::setup::agent {
+class polypuppet::setup::agent (
   Enum['cron', 'service', 'systemd.timer', 'none', 'unmanaged'] $runmode
 ) {
 
@@ -7,12 +7,7 @@ class polypuppet::setup::agent {
     runmode => $runmode,
   }
 
-  class { '::python':
-    version => 'system',
-    pip     => 'present',
-  }
-
-  if not defined('::polypuppet::setup') {
+  if !defined(Class['polypuppet::setup']) {
     class { 'polypuppet::setup':
       polypuppet_type => 'agent'
     }

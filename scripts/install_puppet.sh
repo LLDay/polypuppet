@@ -28,7 +28,7 @@ elif which apt-get >/dev/null; then
     apt-get update >/dev/null
 
     echo 'Installing puppet-agent'
-    apt-get install -y puppet-agent >/dev/null 2>&1
+    apt-get install -y -o Dpkg::Options::="--force-confold" puppet-agent >/dev/null 2>&1
 
     case $(lsb_release -is) in
         Debian)
@@ -40,7 +40,8 @@ elif which apt-get >/dev/null; then
     echo 'Importing foreman repository'
     echo "deb http://deb.theforeman.org/ $FOREMAN_NAME nightly" > /etc/apt/sources.list.d/foreman.list
     echo "deb http://deb.theforeman.org/ plugins nightly" >> /etc/apt/sources.list.d/foreman.list
-    wget -q https://deb.theforeman.org/pubkey.gpg -O- | sudo apt-key add -
+    wget -q https://deb.theforeman.org/pubkey.gpg -O- > /etc/apt/trusted.gpg.d/foreman.asc
+    apt-get update >/dev/null
 
 elif which yum >/dev/null; then
     DIST=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
