@@ -1,22 +1,43 @@
 class polypuppet::setup::server(
   Stdlib::HTTPUrl $repository,
+  Boolean $enable_foreman,
   String $server_jvm_min_heap_size,
   String $server_jvm_max_heap_size,
-  Enum['cron', 'service', 'systemd.timer', 'none', 'unmanaged'] $runmode
 ) {
 
-  class { '::python':
-    version => 'system',
-    pip     => 'present',
-  }
+  if $enable_foreman {
 
-  if not defined('::polypuppet::setup') {
-    class { 'polypuppet::setup':
-      polypuppet_type => 'server'
+    class {'::foreman':
+      initial_admin_password => 'password',
+      rails_cache_store      => {
+        type => 'file',
+      },
     }
+
+    package { 'foreman-installer':
+      ensure => installed,
+    }
+
+    ~> exec { 'setup foreman':
+      command     => 'foreman-installer --skip-puppet-version-check',
+      user        => 'root',
+      path        => '/usr/bin:/local/usr/bin:/usr/sbin',
+      refreshonly => true,
+      timeout     => 0,
+    }
+
   }
 
-  $deploy_settings = { 'purge_allowlist' => ['modules/polypuppet'],
+  class { '::puppet':
+    server                   => true,
+    server_foreman           => true,
+    server_ca_allow_sans     => true,
+    server_jvm_min_heap_size => $server_jvm_min_heap_size,
+    server_jvm_max_heap_size => $server_jvm_max_heap_size,
+  }
+
+  $deploy_settings = {
+    'purge_allowlist' => ['modules/polypuppet'],
   }
 
   class { '::r10k':
@@ -33,27 +54,15 @@ class polypuppet::setup::server(
     }
   }
 
-  hocon_setting { 'ca.conf allow-subject-alt-names':
-    ensure  => present,
-    path    => '/etc/puppetlabs/puppetserver/conf.d/ca.conf',
-    setting => 'certificate-authority.allow-subject-alt-names',
-    value   => true,
-    type    => 'boolean',
+  class { '::python':
+    version => 'system',
+    pip     => 'present',
   }
 
-  class {'::foreman':
-    initial_admin_password => 'password',
-    rails_cache_store      => {
-      type => 'file',
-    },
-  }
-
-  class { '::puppet':
-    server                   => true,
-    server_foreman           => true,
-    server_jvm_min_heap_size => $server_jvm_min_heap_size,
-    server_jvm_max_heap_size => $server_jvm_max_heap_size,
-    runmode                  => $runmode,
+  if !defined('::polypuppet::setup') {
+    class { 'polypuppet::setup':
+      polypuppet_type => 'server'
+    }
   }
 
 }

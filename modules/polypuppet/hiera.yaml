@@ -6,7 +6,7 @@ defaults:
 
 hierarchy:
   - name: "OS specific parameters"
-    path: "%{facts.os.family} params.yaml"
+    path: "%{facts.os.family}_params.yaml"
 
   - name: "Default parameters"
-    path: "default params.yaml"
+    path: "default_params.yaml"
