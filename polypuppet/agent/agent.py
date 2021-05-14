@@ -1,6 +1,5 @@
 import asyncio
 import os
-import pathlib
 import platform
 import socket
 import ssl
@@ -84,8 +83,10 @@ class Agent:
     #
 
     def on_login(self, response):
+        puppet = Puppet()
         certname = response.certname
-        ssldir = pathlib.Path(self.config['SSLDIR'])
+
+        ssldir = puppet.ssldir()
         ssl_cert = ssldir / ('certs/' + certname + '.pem')
         ssl_private = ssldir / ('private_keys/' + certname + '.pem')
 
@@ -97,7 +98,6 @@ class Agent:
         self.config['STUDENT_FLOW'] = response.profile.flow
         self.config['STUDENT_GROUP'] = response.profile.group
 
-        puppet = Puppet()
         puppet.certname(response.certname)
         puppet.sync(noop=True)
 

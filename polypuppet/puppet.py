@@ -1,6 +1,9 @@
 import subprocess
+import pathlib
+
 from shutil import which
 from polypuppet.messages import info, error
+from polypuppet.config import Config
 
 
 class PuppetBase:
@@ -14,12 +17,15 @@ class PuppetBase:
 
         return unix_path or windows_path or env_path
 
-    def _run(self, *args):
+    def _run(self, *args, returncode=False):
         full_command = ' '.join([self.path, *args])
         print(full_command)
         run = subprocess.run(full_command.split(),
                              capture_output=True, text=True)
-        return run.stdout.strip()
+        if returncode:
+            return run.returncode
+        else:
+            return run.stdout.strip()
 
     def __init__(self, executable_name):
         self.path = self._get_full_path(executable_name)
@@ -39,11 +45,25 @@ class Puppet(PuppetBase):
         else:
             return self._run('config set', which, value, '--section', section)
 
+    def ssldir(self):
+        config = Config()
+        ssldir = config['SSLDIR']
+        if not ssldir:
+            ssldir = self.config('ssldir')
+            config['SSLDIR'] = ssldir
+        return pathlib.Path(ssldir)
+
+    def clean_certname(self, certname=None):
+        if certname is None:
+            return self._run('ssl clean', returncode=True)
+        else:
+            return self._run('ssl clean --certname', certname, returncode=True)
+
     def certname(self, value=None):
         if value is None:
             return self.config('certname')
         else:
-            self._run('ssl clean')
+            self.clean_certname()
             self.config('certname', value, section='agent')
 
     def sync(self, noop=False):
@@ -71,7 +91,7 @@ class PuppetServer(PuppetBase):
         super().__init__('puppetserver')
 
     def generate(self, certname):
-        return self._run('ca generate --certname', certname)
+        return self._run('ca generate --certname', certname, returncode=False)
 
-    def clear_certname(self, certname):
-        return self._run('ca clean --certname', certname)
+    def clean_certname(self, certname):
+        return self._run('ca clean --certname', certname, returncode=False)

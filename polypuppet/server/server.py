@@ -1,9 +1,9 @@
 import asyncio
-import pathlib
 import socket
 import ssl
 import warnings
 
+from pathlib import Path
 from polypuppet import proto
 from polypuppet import Config
 from polypuppet import PuppetServer, Puppet
@@ -64,7 +64,7 @@ class Server:
             return proto.Message()
 
     def wait_for_certificate(self, certname):
-        self.puppetserver.clear_certname(certname)
+        self.puppetserver.clean_certname(certname)
         self.certlist.append(certname)
 
     def _handle_user_login(self, username, password):
@@ -136,11 +136,9 @@ class Server:
     #
 
     def get_ssl_context(self):
-        ssldir = pathlib.Path(self.config['SSLDIR'])
-        ssl_cert = ssldir / ('certs/' + POLYPUPPET_PEM_NAME + '.pem')
-        ssl_private = ssldir / ('private_keys/' + POLYPUPPET_PEM_NAME + '.pem')
-        if not ssl_cert.exists() or not ssl_private.exists():
-            error.must_call_setup_server()
+        self.ensure_has_certificate()
+        ssl_cert = Path(self.config['SSL_SERVER_CERT'])
+        ssl_private = Path(self.config['SSL_SERVER_PRIVATE'])
 
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
         ssl_context.load_cert_chain(ssl_cert, ssl_private)
@@ -156,6 +154,43 @@ class Server:
             error.server_cannot_bind(ip, port, e)
         wrapper = ssl_context.wrap_socket(sock, server_side=True)
         return await asyncio.start_server(handler, sock=wrapper)
+
+    def clean_certificate(self):
+        self.puppetserver.clean_certname(POLYPUPPET_PEM_NAME)
+        self.puppet.clean_certname(POLYPUPPET_PEM_NAME)
+        self.config['SSL_SERVER_CERT'] = ''
+        self.config['SSL_SERVER_PRIVATE'] = ''
+
+    def ensure_has_certificate(self):
+        cert_path = self.config['SSL_SERVER_CERT']
+        private_path = self.config['SSL_SERVER_PRIVATE']
+        generate_certificate = False
+
+        if not cert_path or not private_path:
+            generate_certificate = True
+
+        if not Path(cert_path).exists() or not Path(private_path).exists():
+            generate_certificate = True
+
+        if generate_certificate:
+            generated = self.puppetserver.generate(POLYPUPPET_PEM_NAME)
+            if not generated:
+                self.clean_certificate()
+                generated = self.puppetserver.generate(POLYPUPPET_PEM_NAME)
+
+            # Recheck after second generation
+            if not generated:
+                raise Exception('Cannot generate certificate')
+
+            ssl_cert = 'certs/' + POLYPUPPET_PEM_NAME + '.pem'
+            ssl_private = 'private_keys/' + POLYPUPPET_PEM_NAME + '.pem'
+
+            ssldir = self.puppet.ssldir()
+            ssl_cert = ssldir / ssl_cert
+            ssl_private = ssldir / ssl_private
+
+            self.config['SSL_SERVER_CERT'] = ssl_cert.as_posix()
+            self.config['SSL_SERVER_PRIVATE'] = ssl_private.as_posix()
 
     #
     # Execution control

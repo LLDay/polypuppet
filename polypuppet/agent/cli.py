@@ -7,9 +7,10 @@ import os
 
 from polypuppet import Config
 from polypuppet.agent.agent import Agent
-from polypuppet.agent.setup import setup_server, setup_agent
-from polypuppet.server.server import main as server_main
 from polypuppet.messages import info, error
+from polypuppet.puppet import PuppetServer
+from polypuppet.server.server import Server
+from polypuppet.server.server import main as server_main
 
 
 @click.group()
@@ -57,7 +58,12 @@ def audience(number, token):
 @cli.command()
 @click.option('-d', '--daemon', is_flag=True, default=False)
 @click.option('-r', '--restart', is_flag=True, default=False)
-def server(daemon, restart):
+@click.option('-c', '--clean', is_flag=True, default=False)
+def server(daemon, restart, clean):
+    if clean:
+        server = Server()
+        server.clean_certificate()
+
     if restart:
         agent = Agent()
         agent.stop_server()
@@ -92,15 +98,6 @@ def config(key, test, value):
             config.restricted_set(key, value)
         elif config[key] != value:
             exit(1)
-
-
-@cli.command()
-@click.argument('what', type=click.Choice(['agent', 'server']), required=True)
-def setup(what):
-    if what == 'server':
-        setup_server()
-    elif what == 'agent':
-        setup_agent()
 
 
 @cli.command()

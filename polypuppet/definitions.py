@@ -1,10 +1,17 @@
+import platform
 from pathlib import Path
 
 EOF_SIGN = b'__EOF__'
 
 AUTOSIGN_PATH = Path('/usr/local/bin/polypuppet-autosign')
-CONFIG_DIR = Path('/etc/polypuppet/')
-CONFIG_PATH = Path(CONFIG_DIR / 'polypuppet.ini')
+
+if platform.system() == 'Windows':
+    CONFIG_DIR = os.path.expandvars('%PROGRAMDATA%\\polypuppet\\')
+else:
+    CONFIG_DIR = '/etc/polypuppet/'
+
+CONFIG_DIR = Path(CONFIG_DIR)
+CONFIG_PATH = Path(CONFIG_DIR / 'config.ini')
 TOKEN_PATH = Path(CONFIG_DIR / 'token')
 
 PUPPET_SETTINGS_PATH_U = Path('/etc/default/puppetserver')

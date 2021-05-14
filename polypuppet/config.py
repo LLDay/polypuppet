@@ -58,7 +58,8 @@ class Config:
             'SSLDIR': '',
             'SSL_CERT': '',
             'SSL_PRIVATE': '',
-            'CONFDIR': CONFIG_DIR}
+            'SSL_SERVER_CERT': '',
+            'SSL_SERVER_PRIVATE': ''}
 
         if CONFIG_PATH.exists():
             read_config = configparser.ConfigParser()
