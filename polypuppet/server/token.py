@@ -1,9 +1,10 @@
 import os
 import secrets
 
-from polypuppet import config
-from polypuppet.messages import error
-from polypuppet.definitions import TOKEN_PATH, CONFIG_DIR
+from polypuppet.definitions import CONFIG_DIR
+from polypuppet.definitions import TOKEN_PATH
+from polypuppet.exception import PolypuppetException
+from polypuppet.messages import messages
 
 
 class Token:
@@ -14,8 +15,9 @@ class Token:
             if TOKEN_PATH.exists():
                 with open(TOKEN_PATH, 'r') as tokenfile:
                     self.token = tokenfile.readline()
-        except:
-            error.cannot_create_token_file()
+        except Exception as exception:
+            exception_message = messages.cannot_create_config_file()
+            raise PolypuppetException(exception_message) from exception
 
     def _set(self, token):
         self.token = token

@@ -1,8 +1,10 @@
 import json
 
+from polypuppet.exception import PolypuppetException
+from polypuppet.messages import messages
+from polypuppet.server.person import Person
+from polypuppet.server.person import PersonType
 from requests_html import HTMLSession
-from polypuppet.server.person import Person, PersonType
-from polypuppet.messages import error
 
 _payload = {
     "username": "",
@@ -19,14 +21,15 @@ def authenticate(username, password):
 
     session = HTMLSession()
     try:
-        r = session.post('https://cas.spbstu.ru/login', _payload)
-    except:
-        error.cannot_connect_to_cas()
+        response = session.post('https://cas.spbstu.ru/login', _payload)
+    except Exception as exception:
+        exception_message = messages.cannot_connect_to_cas()
+        raise PolypuppetException(exception_message) from exception
 
-    if r.status_code != 200:
+    if response.status_code != 200:
         return Person()
 
-    person_html = r.html.find("script")[0]
+    person_html = response.html.find("script")[0]
     person_json = json.loads(person_html.text)['user']['wsAsu']
 
     person = Person(username=username)

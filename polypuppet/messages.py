@@ -1,83 +1,95 @@
 import getpass
+import logging
+import sys
 
 
-class _InfoEn:
-    def username(self):
-        return input('Username: ')
-
-    def password(self):
-        return getpass.getpass('Password: ')
+class _MessagesEn:
+    def _concat(self, *args):
+        return ' '.join(str(arg) for arg in args)
 
     def logged_in(self):
-        print('Logged in successfully')
+        return 'Logged in successfully'
 
     def not_logged_in(self):
-        print('Wrong credentials')
+        return 'Wrong credentials'
+
+    def server_is_on(self, ip, port):
+        return self._concat('Server is listening on', ip, 'with port', port)
+
+    def wrong_message_from(self, ip):
+        return self._concat('Wrong message from host', ip)
+
+    def wrong_message_from_server(self):
+        return self._concat('Wrong message from server')
 
     def no_config_key(self, key):
-        print('There is no key', key)
+        return self._concat('There is no key', key)
 
     def cannot_change_key(self, key):
-        print('You cannot explicitly change key', key)
+        return self._concat('You cannot explicitly change key', key)
 
-    def puppet_exec_no_exit(self, executable_name):
-        print('Exetuable does not exist:', executable_name)
-        print('You should install it first')
+    def executable_not_exists(self, executable_name):
+        return self._concat('Exetuable does not exist:', executable_name + '.', 'You should install it first')
 
-    def agent_cannot_connect_server(self, ip, port):
-        print('Cannot open connection to the server on', ip, 'with port', port)
+    def cannot_connect_to_server(self, ip, port):
+        return self._concat('Cannot open connection to the server on', ip, 'with port', port)
 
     def cannot_create_config_file(self):
-        print('Cannot change config file because of low permissions')
+        return 'Cannot change config file because of low permissions'
 
     def cannot_create_token_file(self):
-        print('Cannot create token file because of low permissions')
+        return 'Cannot create token file because of low permissions'
 
     def cannot_connect_to_cas(self):
-        print('Cannot connect to the CAS')
+        return 'Cannot connect to the CAS'
 
     def wait_for_cert(self, certname):
-        print('Waiting for CSR from', certname)
+        return self._concat('Waiting for CSR from', certname)
 
     def stop_waiting_for_cert(self, certname):
-        print('Stop waiting for CSR from', certname)
+        return self._concat('Stop waiting for CSR from', certname)
 
-    def request_for_cert(self, certname, presented):
-        print('Puppetserver requested for', certname)
-        if presented:
-            print('This certname is presented')
-        else:
-            print('This certname is not presented')
+    def cert_is_known(self, certname):
+        return self._concat('Puppetserver requested for known certname', certname)
+
+    def cert_is_unknown(self, certname):
+        return self._concat('Puppetserver requested for unknown certname', certname + '.', "It won't be signed")
 
     def server_generated_token(token):
-        print('Server has generated token', token)
-
-    def server_cannot_bind(self, ip, port, why):
-        print('Server cannot bind', ip, 'with port', port)
-        print(why)
+        return self._concat('Server has generated token', token)
 
     def server_stopped(self):
-        print('Server stopped successfully')
+        return 'Server stopped successfully'
 
     def must_call_setup_server(self):
-        print('You must call "polypuppet setup server" first')
+        return 'You must call "polypuppet setup server" first'
 
     def cannot_request_token(self):
-        print('Cannot request token. No server runs on local machine')
+        return 'Cannot request token. No server runs on local machine'
 
     def token_not_generated(self):
-        print("Token has not been generated. Call 'polypuppet token --new' first")
+        return "Token has not been generated. Call 'polypuppet token --new' first"
+
+    def cannot_generate_certificate(self):
+        return 'Server cannot generate certificate'
+
+    def trying_to_regenerate_certificate(self):
+        return 'Server cannot generate certificate. Trying to clean the certificate and generate again'
+
+    def certificate_is_not_presented(self):
+        return 'Server cannot find certificate. Generating a new one'
+
+    def server_sends(self, message):
+        return 'Server sends:\n' + str(message)
+
+    def server_receives(self, message):
+        return 'Server receives:\n' + str(message)
+
+    def agent_sends(self, message):
+        return 'Agent sends:\n' + str(message)
+
+    def agent_receives(self, message):
+        return 'Agent receives:\n' + str(message)
 
 
-class _Error(_InfoEn):
-    def __getattribute__(self, attr):
-        function = getattr(_InfoEn(), attr)
-
-        def run_and_exit(*args, **kwargs):
-            function(*args, **kwargs)
-            exit(1)
-        return run_and_exit
-
-
-info = _InfoEn()
-error = _Error()
+messages = _MessagesEn()

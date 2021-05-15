@@ -1,21 +1,30 @@
 #!/usr/bin/env python3
-
-import click
-import getpass
+import logging
 import multiprocessing as mp
 import os
+import sys
 
+import click
+import coloredlogs
 from polypuppet import Config
 from polypuppet.agent.agent import Agent
-from polypuppet.messages import info, error
-from polypuppet.puppet import PuppetServer
-from polypuppet.server.server import Server
+from polypuppet.exception import PolypuppetException
+from polypuppet.messages import messages
 from polypuppet.server.server import main as server_main
+from polypuppet.server.server import Server
 
 
 @click.group()
-def cli():
-    pass
+@click.option('-v', '--verbose', is_flag=True)
+@click.option('-q', '--quiet', is_flag=True)
+def cli(verbose, quiet):
+    loglevel = logging.INFO
+    if quiet:
+        loglevel = logging.CRITICAL
+    elif verbose:
+        loglevel = logging.DEBUG
+
+    coloredlogs.install(level=loglevel)
 
 
 @cli.command()
@@ -24,23 +33,24 @@ def autosign(certname):
     agent = Agent()
     has_certname = agent.autosign(certname)
     if not has_certname:
-        exit(1)
+        sys.exit(1)
+
+
+def check_login(response):
+    if response:
+        logging.info(messages.logged_in())
+    else:
+        logging.error(messages.not_logged_in())
+        sys.exit(1)
 
 
 @cli.command()
-@click.argument('username', required=False)
-@click.argument('password', required=False)
+@click.option('-u', '--username', prompt=True)
+@click.password_option('-p', '--password', confirmation_prompt=False)
 def login(username, password):
     agent = Agent()
-    if username is None:
-        username = info.username()
-    if password is None:
-        password = info.password()
     response = agent.login(username, password)
-    if response:
-        info.logged_in()
-    else:
-        error.not_logged_in()
+    check_login(response)
 
 
 @cli.command()
@@ -49,37 +59,42 @@ def login(username, password):
 def audience(number, token):
     agent = Agent()
     response = agent.audience(number, token)
-    if response:
-        info.logged_in()
-    else:
-        error.not_logged_in()
+    check_login(response)
+
+
+def start_server():
+    try:
+        server_main()
+    except PolypuppetException as pe:
+        pe.print_with_exit()
 
 
 @cli.command()
-@click.option('-d', '--daemon', is_flag=True, default=False)
-@click.option('-r', '--restart', is_flag=True, default=False)
-@click.option('-c', '--clean', is_flag=True, default=False)
-def server(daemon, restart, clean):
-    if clean:
-        server = Server()
-        server.clean_certificate()
+@click.option('-d', '--daemon', is_flag=True)
+@click.option('-r', '--restart', is_flag=True)
+@click.option('-c', '--clean', is_flag=True)
+@click.option('-s', '--stop', is_flag=True)
+def server(daemon, restart, clean, stop):
+    if restart or stop:
+        try:
+            agent = Agent()
+            agent.stop_server()
+        except PolypuppetException:
+            pass
 
-    if restart:
-        agent = Agent()
-        agent.stop_server()
+    if stop:
+        return
+
+    if clean:
+        server_instance = Server()
+        server_instance.clean_certificate()
 
     if daemon:
-        process = mp.Process(target=server_main)
+        process = mp.Process(target=start_server)
         process.start()
         os._exit(0)
     else:
-        server_main()
-
-
-@cli.command()
-def stop():
-    agent = Agent()
-    agent.stop_server()
+        start_server()
 
 
 @cli.command()
@@ -87,17 +102,17 @@ def stop():
 @click.argument('value', required=False)
 @click.option('-t', '--test', is_flag=True)
 def config(key, test, value):
-    config = Config()
+    global_config = Config()
     if key is None:
-        for k, v in config.all().items():
-            print(k + '=' + v)
+        for key, value in global_config.all().items():
+            logging.info(key + '=' + value)
     elif value is None:
-        print(config[key])
+        logging.info(global_config[key])
     else:
         if not test:
-            config.restricted_set(key, value)
-        elif config[key] != value:
-            exit(1)
+            global_config.restricted_set(key, value)
+        elif global_config[key] != value:
+            sys.exit(1)
 
 
 @cli.command()
@@ -105,18 +120,25 @@ def config(key, test, value):
 @click.option('--clear', '-c', is_flag=True)
 def token(new, clear):
     agent = Agent()
-    config = Config()
     if clear:
-        token = agent.clear_token()
-    elif new:
-        token = agent.update_token()
-        print(token)
+        agent.clear_token()
+        return
+
+    if new:
+        server_token = agent.update_token()
     else:
-        token = agent.get_token()
-        if token == str():
-            error.token_not_generated()
-        print(token)
+        server_token = agent.get_token()
+        if server_token == str():
+            logging.error(messages.token_not_generated())
+            sys.exit(1)
+
+
+def main():
+    try:
+        cli()
+    except PolypuppetException as exception:
+        exception.print_with_exit()
 
 
 if __name__ == "__main__":
-    cli()
+    main()

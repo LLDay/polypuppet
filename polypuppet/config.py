@@ -1,29 +1,34 @@
 import configparser
 
-from polypuppet.definitions import CONFIG_DIR, CONFIG_PATH, POLYPUPPET_PEM_NAME
-from polypuppet.messages import error
+from polypuppet.definitions import CONFIG_DIR
+from polypuppet.definitions import CONFIG_PATH
+from polypuppet.exception import PolypuppetException
+from polypuppet.messages import messages
 
 
 class Config:
     def __getitem__(self, key):
         key = str(key).lower()
         if key not in self.flat:
-            error.no_config_key(key)
+            raise PolypuppetException(messages.no_config_key(key))
         return self.flat[key]
 
     def __setitem__(self, key, value):
+        key = key.lower()
         for k in self.config:
             if key in self.config[k]:
                 self.flat[key] = value
                 self.config[k][key] = value
+                break
 
         try:
             CONFIG_DIR.mkdir(parents=True, exist_ok=True)
             CONFIG_PATH.touch(exist_ok=True)
             with open(CONFIG_PATH, 'w') as configfile:
                 self.config.write(configfile)
-        except:
-            error.cannot_create_config_file()
+        except Exception as exception:
+            exception_message = messages.cannot_create_config_file()
+            raise PolypuppetException(exception_message) from exception
 
     def __contains__(self, key):
         return key in self.flat
@@ -35,9 +40,8 @@ class Config:
                 return
 
         if key not in self.flat:
-            error.no_config_key(key)
-        else:
-            error.cannot_change_key(key)
+            raise PolypuppetException(messages.no_config_key(key))
+        raise PolypuppetException(messages.cannot_change_key(key))
 
     def load(self):
         default_config = configparser.ConfigParser()
@@ -70,7 +74,6 @@ class Config:
                         default_config[section][option] = read_config[section][option]
 
         self.config = default_config
-
         self.flat = {}
         for key in self.config:
             self.flat.update(self.config[key])

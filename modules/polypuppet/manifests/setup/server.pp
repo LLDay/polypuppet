@@ -11,7 +11,7 @@ class polypuppet::setup::server(
     server_ca_allow_sans     => true,
     server_jvm_min_heap_size => $server_jvm_min_heap_size,
     server_jvm_max_heap_size => $server_jvm_max_heap_size,
-    autosign                 => '/usr/local/bin/polypuppet-config',
+    autosign                 => '/usr/local/bin/polypuppet-autosign',
   }
 
   if $enable_foreman {
@@ -68,10 +68,6 @@ class polypuppet::setup::server(
     }
   }
 
-  if !defined(Class['polypuppet::setup']) {
-    class { 'polypuppet::setup':
-      polypuppet_type => 'server'
-    }
-  }
+  include 'polypuppet::setup'
 
 }

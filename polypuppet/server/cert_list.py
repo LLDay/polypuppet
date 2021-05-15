@@ -1,6 +1,8 @@
 import asyncio
+import logging
+
 from polypuppet import Config
-from polypuppet.messages import info
+from polypuppet.messages import messages
 
 
 class CertList:
@@ -15,18 +17,21 @@ class CertList:
 
     def remove(self, certname):
         if certname in self.certlist:
-            info.stop_waiting_for_cert(certname)
+            logging.info(messages.stop_waiting_for_cert(certname))
             self.certlist.remove(certname)
 
     def append(self, certname):
         self.certlist.append(certname)
-        info.wait_for_cert(certname)
+        logging.info(messages.wait_for_cert(certname))
         asyncio.ensure_future(self._certname_stopwatch(certname))
 
     def check_and_remove(self, certname):
         has_certname = certname in self.certlist
         self.remove(certname)
-        info.request_for_cert(certname, has_certname)
+        if has_certname:
+            logging.info(messages.cert_is_known(certname))
+        else:
+            logging.warning(messages.cert_is_unknown(certname))
         return has_certname
 
     def __contains__(self, certname):

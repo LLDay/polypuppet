@@ -1,15 +1,18 @@
 import asyncio
+import logging
 import os
 import platform
 import socket
 import ssl
 import uuid
+import warnings
 
 from polypuppet import proto
-from polypuppet.definitions import EOF_SIGN
 from polypuppet.config import Config
+from polypuppet.definitions import EOF_SIGN
+from polypuppet.exception import PolypuppetException
+from polypuppet.messages import messages
 from polypuppet.puppet import Puppet
-from polypuppet.messages import error
 
 
 class Agent:
@@ -20,18 +23,20 @@ class Agent:
     # Server connection
     #
 
-    async def _connect(self, ip, port, message):
+    async def _connect(self, domain, port, message):
         ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
         ssl_context.check_hostname = False
         ssl_context.verify_mode = ssl.VerifyMode.CERT_NONE
 
         try:
-            sock = socket.create_connection((ip, port))
-        except Exception as e:
-            error.agent_cannot_connect_server(ip, port)
+            sock = socket.create_connection((domain, port))
+        except Exception as exception:
+            exception_message = messages.cannot_connect_to_server(domain, port)
+            raise PolypuppetException(exception_message) from exception
 
         wrapper = ssl_context.wrap_socket(sock)
         reader, writer = await asyncio.open_connection(sock=wrapper)
+        logging.debug(messages.agent_sends(message))
         writer.write(message.SerializeToString())
         writer.write(EOF_SIGN)
         await writer.drain()
@@ -42,18 +47,23 @@ class Agent:
         await writer.wait_closed()
 
         response = proto.Message()
-        response.ParseFromString(raw_message)
+        with warnings.catch_warnings():
+            try:
+                response.ParseFromString(raw_message)
+                logging.debug(messages.agent_receives(response))
+            except Exception:
+                logging.exception(messages.wrong_message_from_server())
         return response
 
     def connect_lan(self, message):
-        ip = 'localhost'
+        domain = 'localhost'
         port = self.config['CONTROL_PORT']
-        return asyncio.run(self._connect(ip, port, message))
+        return asyncio.run(self._connect(domain, port, message))
 
     def connect_wan(self, message):
-        ip = self.config['SERVER_DOMAIN']
+        domain = self.config['SERVER_DOMAIN']
         port = self.config['SERVER_PORT']
-        return asyncio.run(self._connect(ip, port, message))
+        return asyncio.run(self._connect(domain, port, message))
 
     def _token_action(self, action):
         message = proto.Message()
@@ -81,7 +91,6 @@ class Agent:
     #
     # Login
     #
-
     def on_login(self, response):
         puppet = Puppet()
         certname = response.certname
@@ -105,7 +114,7 @@ class Agent:
         os_name = platform.system()
         release = platform.release()
         if os_name == str():
-            os_name = os.name()
+            os_name = os.name
 
         message = proto.Message()
         message.type = proto.LOGIN
