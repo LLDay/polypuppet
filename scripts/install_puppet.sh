@@ -10,8 +10,10 @@ if ! which lsb_release >/dev/null; then
 fi
 
 if which pacman >/dev/null; then
-    echo 'Installing puppet-agent'
-    pacman --noconfirm -Sy puppet >/dev/null
+    if ! which puppet >/dev/null; then
+        echo 'Installing puppet-agent'
+        pacman --noconfirm -Sy puppet >/dev/null
+    fi
 
 elif which apt-get >/dev/null; then
     echo 'Updating apt-get'

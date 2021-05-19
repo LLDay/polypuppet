@@ -16,17 +16,19 @@ class profile::vm (
 
   file { $vagrantfile:
     ensure => present,
-    source => "puppet:///modules/polypuppet/Vagrantfile",
+    source => 'puppet:///modules/polypuppet/Vagrantfile',
   }
 
   exec { "vagrant up ${vms}":
     cwd       => $polypuppet_config_dir,
     subscribe => File[$vagrantfile],
     path      => '/usr/bin:/usr/local/bin',
-  } ~>
-  exec { "vagrant halt ${vms}":
-    cwd  => $polypuppet_config_dir,
-    path => '/usr/bin:/usr/local/bin',
+  }
+
+  ~> exec { "vagrant halt ${vms}":
+    cwd         => $polypuppet_config_dir,
+    path        => '/usr/bin:/usr/local/bin',
+    refreshonly => true,
   }
 
 }

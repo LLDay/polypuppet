@@ -1,8 +1,8 @@
-class polypuppet::setup::server(
-  Stdlib::HTTPUrl $repository,
-  Boolean $enable_foreman,
-  String $server_jvm_min_heap_size,
-  String $server_jvm_max_heap_size,
+class polypuppet::puppet::server(
+  $repository = $polypuppet::repository,
+  $enable_foreman = $polypuppet::enable_foreman,
+  $server_jvm_min_heap_size = $polypuppet::server_jvm_min_heap_size,
+  $server_jvm_max_heap_size = $polypuppet::server_jvm_max_heap_size,
 ) {
 
   class { '::puppet':
@@ -35,19 +35,6 @@ class polypuppet::setup::server(
       realm    => false,
     }
 
-    #-> package { 'foreman-installer':
-      #ensure => installed,
-    #}
-
-    #~> exec { 'setup foreman':
-      #command     => 'foreman-installer --skip-puppet-version-check --no-enable-foreman -l INFO',
-      #user        => 'root',
-      #path        => '/usr/bin:/local/usr/bin:/usr/sbin',
-      #logoutput   => 'on_failure',
-      #refreshonly => true,
-      #timeout     => 0,
-    #}
-
   }
 
   $deploy_settings = {
@@ -67,7 +54,5 @@ class polypuppet::setup::server(
       }
     }
   }
-
-  include 'polypuppet::setup'
 
 }

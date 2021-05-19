@@ -1,19 +1,15 @@
 ---
-# init.pp
-polypuppet::cert_waittime: 90
-polypuppet::confdir: "/etc/polypuppet"
-polypuppet::control_port: 8139
-polypuppet::server_domain: "server.poly.puppet.com"
-polypuppet::server_port: 8139
+polypuppet::polypuppet_cert_waittime: 90
+polypuppet::polypuppet_confdir: "/etc/polypuppet"
+polypuppet::polypuppet_control_port: 8139
+polypuppet::polypuppet_server_port: 8139
 
-# setup.pp
-polypuppet::setup::polypuppet_type: "agent"
+polypuppet::enable_foreman: true
+polypuppet::puppet_confdir: '/etc/puppetlabs'
+polypuppet::puppet_server_domain: "server.poly.puppet.com"
+polypuppet::repository: "https://github.com/LLDay/polypuppet"
 
-# setup/server.pp
-polypuppet::setup::server::enable_foreman: true
-polypuppet::setup::server::repository: "https://github.com/LLDay/polypuppet"
-polypuppet::setup::server::server_jvm_max_heap_size: "512m"
-polypuppet::setup::server::server_jvm_min_heap_size: "512m"
+polypuppet::agent_autostart: false
 
-# setup/agent.pp
-polypuppet::setup::agent::runmode: "none"
+polypuppet::server_jvm_max_heap_size: "512m"
+polypuppet::server_jvm_min_heap_size: "512m"

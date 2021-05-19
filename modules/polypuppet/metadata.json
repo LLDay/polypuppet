@@ -12,7 +12,7 @@
       "version_requirement": ">= 5.0.0"
     },
     {
-      "name": "puppet/python",
+      "name": "puppetlabs/chocolatey",
       "version_requirement": ">= 6.0.0 < 7.0.0"
     },
     {

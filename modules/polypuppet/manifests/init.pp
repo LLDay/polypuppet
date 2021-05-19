@@ -1,44 +1,28 @@
 class polypuppet (
-  Integer $cert_waittime,
-  Integer $control_port,
-  Integer $server_port,
-  String  $confdir,
-  String  $server_domain,
+  Enum['agent', 'server'] $puppet_role,
 
-  Variant[Integer, Undef] $audience = undef,
-  Variant[String, Undef]  $token    = undef,
+  Integer $polypuppet_cert_waittime,
+  Integer $polypuppet_control_port,
+  Integer $polypuppet_server_port,
+  String  $polypuppet_confdir,
+
+  Variant[Integer, Undef] $polypuppet_audience = undef,
+  Variant[String, Undef]  $polypuppet_token = undef,
+
+  Boolean $enable_foreman,
+  Stdlib::HTTPUrl $repository,
+  String $puppet_confdir,
+  String $puppet_server_domain,
+
+  Boolean $agent_autostart,
+
+  String $server_jvm_min_heap_size,
+  String $server_jvm_max_heap_size,
 ) {
-  $polypuppet_config_name = 'polypuppet.ini'
-  $polypuppet_config_path = "${$confdir}/${polypuppet_config_name}"
 
-  exec { 'create config file':
-    command => "mkdir -p ${confdir} && touch ${polypuppet_config_path}",
-    creates => $polypuppet_config_path,
-    path    => '/usr/bin:/usr/local/bin:/usr/sbin:/bin',
-    user    => 'root',
-  }
+  contain polypuppet::install
+  contain polypuppet::config::ini
+  contain polypuppet::puppet::setup
+  contain polypuppet::config::role
 
-  $ini_content = {
-    'server'  => {
-      'server_domain' => $server_domain,
-      'server_port'   => $server_port,
-    },
-    'agent'   => {
-      'cert_waittime' => $cert_waittime,
-      'control_port'  => $control_port,
-    },
-  }
-
-  $ini_path = { 'path' => $polypuppet_config_path }
-  ::inifile::create_ini_settings($ini_content, $ini_path)
-
-  if $audience != undef and $token != undef {
-    $hidden_command = Sensitive("polypuppet audience ${audience} ${token}")
-    exec { 'setup audience number':
-      command => $hidden_command,
-      path    => '/usr/bin:/usr/local/bin:/usr/sbin:/bin',
-      user    => 'root',
-      unless  => "polypuppet config --test audience ${audience}"
-    }
-  }
 }
