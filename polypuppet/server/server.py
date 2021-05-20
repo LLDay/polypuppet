@@ -12,7 +12,7 @@ from polypuppet import PuppetServer
 from polypuppet.definitions import EOF_SIGN
 from polypuppet.definitions import POLYPUPPET_PEM_NAME
 from polypuppet.exception import PolypuppetException
-from polypuppet.messages import messages
+from polypuppet.messages import Messages
 from polypuppet.server.audience import Audience
 from polypuppet.server.authentication import authenticate
 from polypuppet.server.cert_list import CertList
@@ -37,15 +37,15 @@ class Server:
         with warnings.catch_warnings():
             try:
                 message.ParseFromString(raw_message)
-                logging.debug(messages.server_receives(message))
+                logging.debug(Messages.server_receives(message))
             except Exception:
                 address = reader._transport.get_extra_info('peername')
-                logging.exception(messages.wrong_message_from(address))
+                logging.exception(Messages.wrong_message_from(address))
         return message
 
     async def _answer(self, writer, response):
         response.type = proto.RESPONSE
-        logging.debug(messages.server_sends(response))
+        logging.debug(Messages.server_sends(response))
         writer.write(response.SerializeToString())
         writer.write(EOF_SIGN)
         await writer.drain()
@@ -119,7 +119,7 @@ class Server:
         if message.type == proto.AUTOSIGN:
             response = self._handle_autosign(message.certname)
         elif message.type == proto.TOKEN:
-            response = self._handle_token(message.taction, message.token)
+            response = self._handle_token(message.taction)
 
         await self._answer(writer, response)
 
@@ -190,16 +190,16 @@ class Server:
             self.config['SSL_SERVER_PRIVATE'] = ssl_private.as_posix()
 
         if not Path(ssl_cert).exists() or not Path(ssl_private).exists():
-            logging.warning(messages.certificate_is_not_presented())
+            logging.warning(Messages.certificate_is_not_presented())
             generated = self.puppetserver.generate(POLYPUPPET_PEM_NAME)
             if not generated:
-                logging.warning(messages.trying_to_regenerate_certificate())
+                logging.warning(Messages.trying_to_regenerate_certificate())
                 self.clean_certificate()
                 generated = self.puppetserver.generate(POLYPUPPET_PEM_NAME)
 
             # Recheck after second generation
             if not generated:
-                exception_message = messages.cannot_generate_certificate()
+                exception_message = Messages.cannot_generate_certificate()
                 raise PolypuppetException(exception_message)
 
     #
@@ -214,14 +214,14 @@ class Server:
 
         self.agent_connection = await self._create_ssl_connection(
             server_ip, server_port, self.agent_message_handler)
-        logging.info(messages.server_is_on(control_ip, control_port))
+        logging.info(Messages.server_is_on(control_ip, control_port))
 
         self.control_connection = await self._create_ssl_connection(
             control_ip, control_port, self.control_message_handler)
-        logging.info(messages.server_is_on(control_ip, control_port))
+        logging.info(Messages.server_is_on(control_ip, control_port))
 
         await asyncio.wait([self.agent_connection.serve_forever(), self.control_connection.serve_forever()])
-        logging.info(messages.server_stopped())
+        logging.info(Messages.server_stopped())
 
     async def stop(self):
         self.agent_connection.close()

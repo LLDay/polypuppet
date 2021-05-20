@@ -11,7 +11,7 @@ from polypuppet import proto
 from polypuppet.config import Config
 from polypuppet.definitions import EOF_SIGN
 from polypuppet.exception import PolypuppetException
-from polypuppet.messages import messages
+from polypuppet.messages import Messages
 from polypuppet.puppet import Puppet
 
 
@@ -31,12 +31,12 @@ class Agent:
         try:
             sock = socket.create_connection((domain, port))
         except Exception as exception:
-            exception_message = messages.cannot_connect_to_server(domain, port)
+            exception_message = Messages.cannot_connect_to_server(domain, port)
             raise PolypuppetException(exception_message) from exception
 
         wrapper = ssl_context.wrap_socket(sock)
         reader, writer = await asyncio.open_connection(sock=wrapper)
-        logging.debug(messages.agent_sends(message))
+        logging.debug(Messages.agent_sends(message))
         writer.write(message.SerializeToString())
         writer.write(EOF_SIGN)
         await writer.drain()
@@ -50,9 +50,9 @@ class Agent:
         with warnings.catch_warnings():
             try:
                 response.ParseFromString(raw_message)
-                logging.debug(messages.agent_receives(response))
+                logging.debug(Messages.agent_receives(response))
             except Exception:
-                logging.exception(messages.wrong_message_from_server())
+                logging.exception(Messages.wrong_message_from_server())
         return response
 
     def connect_lan(self, message):

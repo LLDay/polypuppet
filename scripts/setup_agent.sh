@@ -5,7 +5,7 @@
 PUPPET_PATH=$(which puppet)
 if [ -z $PUPPET_PATH ]; then
     POSSIBLE_PATH="/opt/puppetlabs/bin/puppet"
-    if [ -f "$PUPPET_PATH" ]; then
+    if [ -f "$POSSIBLE_PATH" ]; then
         PUPPET_PATH="$POSSIBLE_PATH"
     else
         echo 'Cannot find puppet executable'

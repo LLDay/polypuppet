@@ -5,7 +5,7 @@ from shutil import which
 
 from polypuppet.config import Config
 from polypuppet.exception import PolypuppetException
-from polypuppet.messages import messages
+from polypuppet.messages import Messages
 
 
 class PuppetBase:
@@ -38,7 +38,7 @@ class PuppetBase:
     def __init__(self, executable_name):
         self.path = self._get_full_path(executable_name)
         if self.path is None:
-            exception_message = messages.executable_not_exists(executable_name)
+            exception_message = Messages.executable_not_exists(executable_name)
             raise PolypuppetException(exception_message)
 
 

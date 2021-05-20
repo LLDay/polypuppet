@@ -1,7 +1,7 @@
 import json
 
 from polypuppet.exception import PolypuppetException
-from polypuppet.messages import messages
+from polypuppet.messages import Messages
 from polypuppet.server.person import Person
 from polypuppet.server.person import PersonType
 from requests_html import HTMLSession
@@ -23,7 +23,7 @@ def authenticate(username, password):
     try:
         response = session.post('https://cas.spbstu.ru/login', _payload)
     except Exception as exception:
-        exception_message = messages.cannot_connect_to_cas()
+        exception_message = Messages.cannot_connect_to_cas()
         raise PolypuppetException(exception_message) from exception
 
     if response.status_code != 200:

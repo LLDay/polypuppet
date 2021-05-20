@@ -3,14 +3,14 @@ import configparser
 from polypuppet.definitions import CONFIG_DIR
 from polypuppet.definitions import CONFIG_PATH
 from polypuppet.exception import PolypuppetException
-from polypuppet.messages import messages
+from polypuppet.messages import Messages
 
 
 class Config:
     def __getitem__(self, key):
         key = str(key).lower()
         if key not in self.flat:
-            raise PolypuppetException(messages.no_config_key(key))
+            raise PolypuppetException(Messages.no_config_key(key))
         return self.flat[key]
 
     def __setitem__(self, key, value):
@@ -27,7 +27,7 @@ class Config:
             with open(CONFIG_PATH, 'w') as configfile:
                 self.config.write(configfile)
         except Exception as exception:
-            exception_message = messages.cannot_create_config_file()
+            exception_message = Messages.cannot_create_config_file()
             raise PolypuppetException(exception_message) from exception
 
     def __contains__(self, key):
@@ -40,8 +40,8 @@ class Config:
                 return
 
         if key not in self.flat:
-            raise PolypuppetException(messages.no_config_key(key))
-        raise PolypuppetException(messages.cannot_change_key(key))
+            raise PolypuppetException(Messages.no_config_key(key))
+        raise PolypuppetException(Messages.cannot_change_key(key))
 
     def load(self):
         default_config = configparser.ConfigParser()

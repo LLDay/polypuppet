@@ -9,14 +9,14 @@ import coloredlogs
 from polypuppet import Config
 from polypuppet.agent.agent import Agent
 from polypuppet.exception import PolypuppetException
-from polypuppet.messages import messages
+from polypuppet.messages import Messages
 from polypuppet.server.server import main as server_main
 from polypuppet.server.server import Server
 
 
 @click.group()
-@click.option('-v', '--verbose', is_flag=True)
-@click.option('-q', '--quiet', is_flag=True)
+@click.option('-v', '--verbose', is_flag=True, help=Messages.help_verbose())
+@click.option('-q', '--quiet', is_flag=True, help=Messages.help_quiet())
 def cli(verbose, quiet):
     loglevel = logging.INFO
     if quiet:
@@ -38,15 +38,15 @@ def autosign(certname):
 
 def check_login(response):
     if response:
-        logging.info(messages.logged_in())
+        print(Messages.logged_in())
     else:
-        logging.error(messages.not_logged_in())
+        print(Messages.not_logged_in())
         sys.exit(1)
 
 
 @cli.command()
-@click.option('-u', '--username', prompt=True)
-@click.password_option('-p', '--password', confirmation_prompt=False)
+@click.option('-u', '--username', prompt=True, help=Messages.help_username())
+@click.password_option('-p', '--password', confirmation_prompt=False, help=Messages.help_password())
 def login(username, password):
     agent = Agent()
     response = agent.login(username, password)
@@ -69,11 +69,11 @@ def start_server():
         pe.print_with_exit()
 
 
-@cli.command()
-@click.option('-d', '--daemon', is_flag=True)
-@click.option('-r', '--restart', is_flag=True)
-@click.option('-c', '--clean', is_flag=True)
-@click.option('-s', '--stop', is_flag=True)
+@cli.command(help=Messages.help_server())
+@click.option('-d', '--daemon', is_flag=True, help=Messages.help_server_daemon())
+@click.option('-r', '--restart', is_flag=True, help=Messages.help_server_restart())
+@click.option('-c', '--clean', is_flag=True, help=Messages.help_server_clean())
+@click.option('-s', '--stop', is_flag=True, help=Messages.help_server_stop())
 def server(daemon, restart, clean, stop):
     if restart or stop:
         try:
@@ -105,9 +105,9 @@ def config(key, test, value):
     global_config = Config()
     if key is None:
         for key, value in global_config.all().items():
-            logging.info(key + '=' + value)
+            print(key + '=' + value)
     elif value is None:
-        logging.info(global_config[key])
+        print(global_config[key])
     else:
         if not test:
             global_config.restricted_set(key, value)
@@ -126,10 +126,13 @@ def token(new, clear):
 
     if new:
         server_token = agent.update_token()
+        print(server_token)
     else:
         server_token = agent.get_token()
-        if server_token == str():
-            logging.error(messages.token_not_generated())
+        if server_token != str():
+            print(server_token)
+        else:
+            print(Messages.token_not_generated())
             sys.exit(1)
 
 
