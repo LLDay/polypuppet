@@ -9,6 +9,7 @@ import coloredlogs
 from polypuppet import Config
 from polypuppet.agent.agent import Agent
 from polypuppet.exception import PolypuppetException
+from polypuppet.log_format import set_clear_logs
 from polypuppet.messages import Messages
 from polypuppet.server.server import main as server_main
 from polypuppet.server.server import Server
@@ -23,8 +24,7 @@ def cli(verbose, quiet):
         loglevel = logging.CRITICAL
     elif verbose:
         loglevel = logging.DEBUG
-
-    coloredlogs.install(level=loglevel)
+    set_clear_logs(loglevel)
 
 
 @cli.command()
@@ -38,9 +38,9 @@ def autosign(certname):
 
 def check_login(response):
     if response:
-        print(Messages.logged_in())
+        logging.info(Messages.logged_in())
     else:
-        print(Messages.not_logged_in())
+        logging.warning(Messages.not_logged_in())
         sys.exit(1)
 
 
@@ -80,7 +80,7 @@ def server(daemon, restart, stop):
 
     if stop:
         if is_stopped:
-            print('Server stopped')
+            logging.info('Server stopped')
         return
 
     if daemon:
@@ -99,9 +99,9 @@ def config(key, test, value):
     global_config = Config()
     if key is None:
         for key, value in global_config.all().items():
-            print(key + '=' + value)
+            logging.info(key + '=' + value)
     elif value is None:
-        print(global_config[key])
+        logging.info(global_config[key])
     else:
         if not test:
             global_config.restricted_set(key, value)
@@ -120,13 +120,13 @@ def token(new, clear):
 
     if new:
         server_token = agent.update_token()
-        print(server_token)
+        logging.info(server_token)
     else:
         server_token = agent.get_token()
         if server_token != str():
-            print(server_token)
+            logging.info(server_token)
         else:
-            print(Messages.token_not_generated())
+            logging.warning(Messages.token_not_generated())
             sys.exit(1)
 
 

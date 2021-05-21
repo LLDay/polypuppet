@@ -4,6 +4,7 @@ import ssl
 from concurrent import futures
 from pathlib import Path
 
+import coloredlogs
 import grpc
 from google.protobuf.empty_pb2 import Empty
 from polypuppet import Config
@@ -11,6 +12,7 @@ from polypuppet import proto
 from polypuppet import Puppet
 from polypuppet import PuppetServer
 from polypuppet.exception import PolypuppetException
+from polypuppet.log_format import set_extended_logs
 from polypuppet.messages import Messages
 from polypuppet.polypuppet_pb2_grpc import add_LocalConnectionServicer_to_server
 from polypuppet.polypuppet_pb2_grpc import add_RemoteConnectionServicer_to_server
@@ -162,6 +164,8 @@ class Server(LocalConnection, RemoteConnection):
 
         self.local_server.start()
         self.remote_server.start()
+
+        set_extended_logs()
 
         logging.info(Messages.server_is_on(control_ip, control_port))
         logging.info(Messages.server_is_on(server_ip, server_port))
