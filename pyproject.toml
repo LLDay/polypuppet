@@ -13,6 +13,7 @@ requests-html = "^0.10.0"
 configparser = "^5.0.2"
 colorama = "^0.4.4"
 coloredlogs = "^15.0"
+grpcio = "^1.38.0"
 
 [tool.poetry.scripts]
 polypuppet = "polypuppet.agent.cli:main"

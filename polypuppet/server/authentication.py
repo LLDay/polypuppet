@@ -16,12 +16,13 @@ _payload = {
 
 
 def authenticate(username, password):
-    _payload['username'] = username
-    _payload['password'] = password
+    payload = _payload.copy()
+    payload['username'] = username
+    payload['password'] = password
 
     session = HTMLSession()
     try:
-        response = session.post('https://cas.spbstu.ru/login', _payload)
+        response = session.post('https://cas.spbstu.ru/login', payload)
     except Exception as exception:
         exception_message = Messages.cannot_connect_to_cas()
         raise PolypuppetException(exception_message) from exception

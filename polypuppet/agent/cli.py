@@ -72,22 +72,16 @@ def start_server():
 @cli.command(help=Messages.help_server())
 @click.option('-d', '--daemon', is_flag=True, help=Messages.help_server_daemon())
 @click.option('-r', '--restart', is_flag=True, help=Messages.help_server_restart())
-@click.option('-c', '--clean', is_flag=True, help=Messages.help_server_clean())
 @click.option('-s', '--stop', is_flag=True, help=Messages.help_server_stop())
-def server(daemon, restart, clean, stop):
-    if restart or stop:
-        try:
-            agent = Agent()
-            agent.stop_server()
-        except PolypuppetException:
-            pass
+def server(daemon, restart, stop):
+    if stop or restart:
+        agent = Agent()
+        is_stopped = agent.stop_server()
 
     if stop:
+        if is_stopped:
+            print('Server stopped')
         return
-
-    if clean:
-        server_instance = Server()
-        server_instance.clean_certificate()
 
     if daemon:
         process = mp.Process(target=start_server)

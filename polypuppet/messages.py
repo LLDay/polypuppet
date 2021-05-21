@@ -52,13 +52,10 @@ class _MessagesEn:
         return 'Wrong credentials'
 
     def server_is_on(ip, port):
-        return _concat('Server is listening on', ip, 'with port', port)
+        return _concat('Server is listening to', ip, 'with port', port)
 
-    def wrong_message_from(ip):
-        return _concat('Wrong message from host', ip)
-
-    def wrong_message_from_server():
-        return _concat('Wrong message from server')
+    def server_already_runned():
+        return 'Server is already runned'
 
     def no_config_key(key):
         return _concat('There is no key', key)
@@ -99,9 +96,6 @@ class _MessagesEn:
     def server_stopped():
         return 'Server stopped successfully'
 
-    def must_call_setup_server():
-        return 'You must call "polypuppet setup server" first'
-
     def cannot_request_token():
         return 'Cannot request token. No server runs on local machine'
 
@@ -110,12 +104,6 @@ class _MessagesEn:
 
     def cannot_generate_certificate():
         return 'Server cannot generate certificate'
-
-    def trying_to_regenerate_certificate():
-        return 'Server cannot generate certificate. Trying to clean the certificate and generate again'
-
-    def certificate_is_not_presented():
-        return 'Server cannot find certificate. Generating a new one'
 
     def server_sends(message):
         return 'Server sends:\n' + str(message)

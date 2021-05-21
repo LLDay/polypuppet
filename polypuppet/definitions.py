@@ -2,8 +2,6 @@ import os
 import platform
 from pathlib import Path
 
-EOF_SIGN = b'__EOF__'
-
 AUTOSIGN_PATH = Path('/usr/local/bin/polypuppet-autosign')
 
 if platform.system() == 'Windows':
@@ -23,5 +21,3 @@ elif PUPPET_SETTINGS_PATH_C.exists():
     PUPPET_SETTINGS_PATH = PUPPET_SETTINGS_PATH_C
 else:
     PUPPET_SETTINGS_PATH = None
-
-POLYPUPPET_PEM_NAME = 'polypuppet'

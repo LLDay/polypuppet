@@ -1,18 +1,21 @@
-import asyncio
 import logging
-import socket
+import os
 import ssl
-import warnings
+from concurrent import futures
 from pathlib import Path
 
+import grpc
+from google.protobuf.empty_pb2 import Empty
 from polypuppet import Config
 from polypuppet import proto
 from polypuppet import Puppet
 from polypuppet import PuppetServer
-from polypuppet.definitions import EOF_SIGN
-from polypuppet.definitions import POLYPUPPET_PEM_NAME
 from polypuppet.exception import PolypuppetException
 from polypuppet.messages import Messages
+from polypuppet.polypuppet_pb2_grpc import add_LocalConnectionServicer_to_server
+from polypuppet.polypuppet_pb2_grpc import add_RemoteConnectionServicer_to_server
+from polypuppet.polypuppet_pb2_grpc import LocalConnection
+from polypuppet.polypuppet_pb2_grpc import RemoteConnection
 from polypuppet.server.audience import Audience
 from polypuppet.server.authentication import authenticate
 from polypuppet.server.cert_list import CertList
@@ -20,117 +23,76 @@ from polypuppet.server.person import PersonType
 from polypuppet.server.token import Token
 
 
-class Server:
+class Server(LocalConnection, RemoteConnection):
     def __init__(self):
         self.config = Config()
         self.puppet = Puppet()
         self.puppetserver = PuppetServer()
         self.certlist = CertList()
         self.token = Token()
-        self.agent_connection = None
-        self.control_connection = None
+        os.environ['GRPC_VERBOSITY'] = 'NONE'
 
-    async def _read_message(self, reader):
-        raw_message = await reader.readuntil(EOF_SIGN)
-        raw_message = raw_message[:-len(EOF_SIGN)]
-        message = proto.Message()
-        with warnings.catch_warnings():
-            try:
-                message.ParseFromString(raw_message)
-                logging.debug(Messages.server_receives(message))
-            except Exception:
-                address = reader._transport.get_extra_info('peername')
-                logging.exception(Messages.wrong_message_from(address))
-        return message
-
-    async def _answer(self, writer, response):
-        response.type = proto.RESPONSE
-        logging.debug(Messages.server_sends(response))
-        writer.write(response.SerializeToString())
-        writer.write(EOF_SIGN)
-        await writer.drain()
+        thread_pool = futures.ThreadPoolExecutor(max_workers=2)
+        options = [('grpc.so_reuseport', 0)]
+        self.local_server = grpc.server(thread_pool, options=options)
+        self.remote_server = grpc.server(thread_pool, options=options)
 
     #
     # Agent connection handlers
     #
 
-    async def agent_message_handler(self, reader, writer):
-        message = await self._read_message(reader)
-        response = proto.Message()
-
-        if message.type == proto.LOGIN:
-            response = self._handle_login(message)
-
-        await self._answer(writer, response)
-
-    def _handle_login(self, message):
-        profile = message.profile
-        if profile.username != str():
-            return self._handle_user_login(profile.username, profile.password)
-        if profile.audience != 0:
-            return self._handle_audience_login(profile, message.token)
-        return proto.Message()
-
     def wait_for_certificate(self, certname):
         self.puppetserver.clean_certname(certname)
         self.certlist.append(certname)
 
-    def _handle_user_login(self, username, password):
-        response = proto.Message()
+    def login_user(self, credentials, context):
+        username = credentials.username
+        password = credentials.password
+
+        profile = proto.Profile()
         person = authenticate(username, password)
         if person.valid():
             certname = person.certname()
-            response.ok = True
-            response.certname = certname
-            response.profile.flow = person.flow
-            response.profile.group = person.group
+            profile.ok = True
+            profile.certname = certname
+            profile.flow = person.flow
+            profile.group = person.group
 
             if person.type == PersonType.STUDENT:
-                response.profile.role = proto.STUDENT
+                profile.role = proto.STUDENT
             else:
-                response.profile.role = proto.OTHER
+                profile.role = proto.OTHER
 
             self.wait_for_certificate(certname)
-        return response
+        return profile
 
-    def _handle_audience_login(self, profile, token):
-        response = proto.Message()
-        if not self.token.empty() and token == self.token:
-            audience = Audience(profile.audience, profile.platform,
-                                profile.release, profile.uuid)
+    def login_audience(self, credentials, context):
+        profile = proto.Profile()
+        token = self.token
+        if not token.empty() and credentials.token == token:
+            audience = Audience(credentials.audience, credentials.platform,
+                                credentials.release, credentials.uuid)
+
             certname = audience.certname()
-            response.ok = True
-            response.certname = certname
-            response.profile.role = proto.AUDIENCE
-            response.profile.audience = profile.audience
+            profile.ok = True
+            profile.role = proto.AUDIENCE
+            profile.certname = certname
+            profile.audience = credentials.audience
             self.wait_for_certificate(certname)
-        return response
+        return profile
 
     #
     # Control connection handlers
     #
 
-    async def control_message_handler(self, reader, writer):
-        message = await self._read_message(reader)
-        response = proto.Message()
-
-        if message.type == proto.STOP:
-            await self.stop()
-        if message.type == proto.AUTOSIGN:
-            response = self._handle_autosign(message.certname)
-        elif message.type == proto.TOKEN:
-            response = self._handle_token(message.taction)
-
-        await self._answer(writer, response)
-
-    def _handle_autosign(self, certname):
-        response = proto.Message()
-        response.ok = self.certlist.check_and_remove(certname)
+    def autosign(self, request, context):
+        response = proto.Autosign()
+        response.ok = self.certlist.check_and_remove(request.certname)
         return response
 
-    def _handle_token(self, taction):
-        response = proto.Message()
-        response.ok = True
+    def manage_token(self, request, context):
+        response = proto.Token()
+        taction = request.taction
         if taction == proto.GET:
             response.token = self.token.get()
         elif taction == proto.NEW:
@@ -139,99 +101,79 @@ class Server:
             self.token.clear()
         return response
 
+    def stop(self, request, context):
+        self.local_server.stop(5)
+        self.remote_server.stop(5)
+        return Empty()
+
     #
-    # SSL setup
+    # Certificates
     #
-
-    def get_ssl_context(self):
-        self.ensure_has_certificate()
-        ssl_cert = Path(self.config['SSL_SERVER_CERT'])
-        ssl_private = Path(self.config['SSL_SERVER_PRIVATE'])
-
-        print(self.config['SSL_SERVER_CERT'],
-              self.config['SSL_SERVER_PRIVATE'])
-        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-        ssl_context.load_cert_chain(ssl_cert, ssl_private)
-        return ssl_context
-
-    async def _create_ssl_connection(self, ip, port, handler):
-        ssl_context = self.get_ssl_context()
-        try:
-            sock = socket.create_server((ip, port))
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-
-        except OSError as os_error:
-            raise PolypuppetException(os_error.strerror) from os_error
-        except Exception as exception:
-            raise PolypuppetException(str(exception)) from exception
-
-        wrapper = ssl_context.wrap_socket(sock, server_side=True)
-        return await asyncio.start_server(handler, sock=wrapper)
-
-    def clean_certificate(self):
-        self.puppetserver.clean_certname(POLYPUPPET_PEM_NAME)
-        self.puppet.clean_certname(POLYPUPPET_PEM_NAME)
-        self.config['SSL_SERVER_CERT'] = ''
-        self.config['SSL_SERVER_PRIVATE'] = ''
 
     def ensure_has_certificate(self):
-        ssl_cert = self.config['SSL_SERVER_CERT']
-        ssl_private = self.config['SSL_SERVER_PRIVATE']
+        ssl_cert = self.config['SSL_CERT']
+        ssl_private = self.config['SSL_PRIVATE']
 
         if not ssl_cert or not ssl_private:
-            ssl_cert = 'certs/' + POLYPUPPET_PEM_NAME + '.pem'
-            ssl_private = 'private_keys/' + POLYPUPPET_PEM_NAME + '.pem'
+            certname = self.puppet.certname()
+            ssl_cert = 'certs/' + certname + '.pem'
+            ssl_private = 'private_keys/' + certname + '.pem'
 
             ssldir = self.puppet.ssldir()
             ssl_cert = ssldir / ssl_cert
             ssl_private = ssldir / ssl_private
 
-            self.config['SSL_SERVER_CERT'] = ssl_cert.as_posix()
-            self.config['SSL_SERVER_PRIVATE'] = ssl_private.as_posix()
-
-        if not Path(ssl_cert).exists() or not Path(ssl_private).exists():
-            logging.warning(Messages.certificate_is_not_presented())
-            generated = self.puppetserver.generate(POLYPUPPET_PEM_NAME)
-            if not generated:
-                logging.warning(Messages.trying_to_regenerate_certificate())
-                self.clean_certificate()
-                generated = self.puppetserver.generate(POLYPUPPET_PEM_NAME)
-
-            # Recheck after second generation
-            if not generated:
-                exception_message = Messages.cannot_generate_certificate()
-                raise PolypuppetException(exception_message)
+            self.config['SSL_CERT'] = ssl_cert.as_posix()
+            self.config['SSL_PRIVATE'] = ssl_private.as_posix()
 
     #
-    # Execution control
+    # Execution
     #
 
-    async def run(self):
+    def run(self):
+        self.ensure_has_certificate()
+        add_LocalConnectionServicer_to_server(self, self.local_server)
+        add_RemoteConnectionServicer_to_server(self, self.remote_server)
+
         server_ip = self.config['SERVER_DOMAIN']
-        server_port = int(self.config['SERVER_PORT'])
+        server_port = self.config['SERVER_PORT']
+        server_address = server_ip + ':' + server_port
+
         control_ip = 'localhost'
-        control_port = int(self.config['CONTROL_PORT'])
+        control_port = self.config['CONTROL_PORT']
+        control_address = control_ip + ':' + control_port
 
-        self.agent_connection = await self._create_ssl_connection(
-            server_ip, server_port, self.agent_message_handler)
+        ssl_cert = Path(self.config['SSL_CERT'])
+        with open(ssl_cert, 'rb') as cert:
+            ssl_cert = cert.read()
+
+        ssl_private = Path(self.config['SSL_PRIVATE'])
+        with open(ssl_private, 'rb') as private:
+            ssl_private = private.read()
+
+        credentials = grpc.ssl_server_credentials([(ssl_private, ssl_cert)])
+
+        try:
+            self.local_server.add_insecure_port(control_address)
+            self.remote_server.add_secure_port(server_address, credentials)
+        except Exception as exception:
+            exception_message = Messages.server_already_runned()
+            raise PolypuppetException(exception_message) from exception
+
+        self.local_server.start()
+        self.remote_server.start()
+
         logging.info(Messages.server_is_on(control_ip, control_port))
+        logging.info(Messages.server_is_on(server_ip, server_port))
 
-        self.control_connection = await self._create_ssl_connection(
-            control_ip, control_port, self.control_message_handler)
-        logging.info(Messages.server_is_on(control_ip, control_port))
-
-        await asyncio.wait([self.agent_connection.serve_forever(), self.control_connection.serve_forever()])
+        self.local_server.wait_for_termination()
+        self.remote_server.wait_for_termination()
         logging.info(Messages.server_stopped())
-
-    async def stop(self):
-        self.agent_connection.close()
-        self.control_connection.close()
-        await asyncio.gather(self.agent_connection.wait_closed(), self.control_connection.wait_closed())
 
 
 def main():
     server = Server()
-    asyncio.run(server.run())
+    server.run()
 
 
 if __name__ == "__main__":

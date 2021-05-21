@@ -68,7 +68,7 @@ class Puppet(PuppetBase):
 
     def certname(self, value=None):
         if value is None:
-            return self.config('certname', rm=True)
+            return self.config('certname')
         self.clean_certname()
         return self.config('certname', value, section='agent')
 

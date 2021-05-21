@@ -1,75 +1,68 @@
-import asyncio
 import logging
 import os
 import platform
-import socket
 import ssl
 import uuid
-import warnings
 
+import grpc
+from google.protobuf.empty_pb2 import Empty
 from polypuppet import proto
 from polypuppet.config import Config
-from polypuppet.definitions import EOF_SIGN
 from polypuppet.exception import PolypuppetException
 from polypuppet.messages import Messages
+from polypuppet.polypuppet_pb2_grpc import LocalConnectionStub
+from polypuppet.polypuppet_pb2_grpc import RemoteConnectionStub
 from polypuppet.puppet import Puppet
 
 
 class Agent:
     def __init__(self):
         self.config = Config()
+        self.connectin_timeout = 0.5
 
     #
     # Server connection
     #
 
-    async def _connect(self, domain, port, message):
-        ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.VerifyMode.CERT_NONE
-
+    def check_connection(self, channel, domain, port):
         try:
-            sock = socket.create_connection((domain, port))
+            grpc.channel_ready_future(channel).result(self.connectin_timeout)
+        except grpc.FutureTimeoutError as error:
+            error_message = Messages.cannot_connect_to_server(domain, port)
+            raise PolypuppetException(error_message) from error
+
+    def get_local_stub(self):
+        domain = 'localhost'
+        port = self.config['CONTROL_PORT']
+        channel = grpc.insecure_channel(domain + ':' + str(port))
+        self.check_connection(channel, domain, port)
+        return LocalConnectionStub(channel)
+
+    def get_secure_channel(self, domain, port):
+        # Temporary solution with self signed certificates
+        # TODO: Remove server_cert and leave ssl_channel_credentials arguments
+        # list empty when the server become trusted
+        try:
+            server_cert = ssl.get_server_certificate((domain, port))
         except Exception as exception:
             exception_message = Messages.cannot_connect_to_server(domain, port)
             raise PolypuppetException(exception_message) from exception
 
-        wrapper = ssl_context.wrap_socket(sock)
-        reader, writer = await asyncio.open_connection(sock=wrapper)
-        logging.debug(Messages.agent_sends(message))
-        writer.write(message.SerializeToString())
-        writer.write(EOF_SIGN)
-        await writer.drain()
+        credentials = grpc.ssl_channel_credentials(server_cert.encode())
+        return grpc.secure_channel(domain + ':' + str(port), credentials)
 
-        raw_message = await reader.readuntil(EOF_SIGN)
-        raw_message = raw_message[:-len(EOF_SIGN)]
-        writer.close()
-        await writer.wait_closed()
-
-        response = proto.Message()
-        with warnings.catch_warnings():
-            try:
-                response.ParseFromString(raw_message)
-                logging.debug(Messages.agent_receives(response))
-            except Exception:
-                logging.exception(Messages.wrong_message_from_server())
-        return response
-
-    def connect_lan(self, message):
-        domain = 'localhost'
-        port = self.config['CONTROL_PORT']
-        return asyncio.run(self._connect(domain, port, message))
-
-    def connect_wan(self, message):
+    def get_remote_stub(self):
         domain = self.config['SERVER_DOMAIN']
         port = self.config['SERVER_PORT']
-        return asyncio.run(self._connect(domain, port, message))
+        channel = self.get_secure_channel(domain, port)
+        self.check_connection(channel, domain, port)
+        return RemoteConnectionStub(channel)
 
     def _token_action(self, action):
-        message = proto.Message()
-        message.type = proto.TOKEN
+        message = proto.Token()
         message.taction = action
-        response = self.connect_lan(message)
+        local_stub = self.get_local_stub()
+        response = local_stub.manage_token(message)
         return response.token
 
     def get_token(self):
@@ -82,15 +75,16 @@ class Agent:
         return self._token_action(proto.NEW)
 
     def autosign(self, certname):
-        message = proto.Message()
-        message.type = proto.AUTOSIGN
+        message = proto.Certname()
         message.certname = certname
-        response = self.connect_lan(message)
+        local_stub = self.get_local_stub()
+        response = local_stub.autosign(message)
         return response.ok
 
     #
     # Login
     #
+
     def on_login(self, response):
         puppet = Puppet()
         certname = response.certname
@@ -100,12 +94,12 @@ class Agent:
         ssl_private = ssldir / ('private_keys/' + certname + '.pem')
 
         self.config['AGENT_CERTNAME'] = certname
-        self.config['AUDIENCE'] = str(response.profile.audience)
-        self.config['ROLE'] = proto.Role.Name(response.profile.role).lower()
+        self.config['AUDIENCE'] = str(response.audience)
+        self.config['ROLE'] = proto.Role.Name(response.role).lower()
         self.config['SSL_CERT'] = ssl_cert.as_posix()
         self.config['SSL_PRIVATE'] = ssl_private.as_posix()
-        self.config['STUDENT_FLOW'] = response.profile.flow
-        self.config['STUDENT_GROUP'] = response.profile.group
+        self.config['STUDENT_FLOW'] = response.flow
+        self.config['STUDENT_GROUP'] = response.group
 
         puppet.certname(response.certname)
         puppet.sync(noop=True)
@@ -116,30 +110,34 @@ class Agent:
         if os_name == str():
             os_name = os.name
 
-        message = proto.Message()
-        message.type = proto.LOGIN
+        message = proto.CredentialsAudience()
         message.token = token
-        message.profile.audience = number
-        message.profile.uuid = uuid.getnode()
-        message.profile.platform = os_name
-        message.profile.release = release
+        message.audience = number
+        message.uuid = uuid.getnode()
+        message.platform = os_name
+        message.release = release
 
-        response = self.connect_wan(message)
+        remote_stub = self.get_remote_stub()
+        response = remote_stub.login_audience(message)
         if response.ok:
             self.on_login(response)
         return response.ok
 
     def login(self, username, password):
-        message = proto.Message()
-        message.type = proto.LOGIN
-        message.profile.username = username
-        message.profile.password = password
-        response = self.connect_wan(message)
+        message = proto.CredentialsUser()
+        message.username = username
+        message.password = password
+
+        remote_stub = self.get_remote_stub()
+        response = remote_stub.login_user(message)
         if response.ok:
             self.on_login(response)
         return response.ok
 
     def stop_server(self):
-        message = proto.Message()
-        message.type = proto.STOP
-        self.connect_lan(message)
+        try:
+            local_stub = self.get_local_stub()
+            local_stub.stop(Empty())
+            return True
+        except PolypuppetException:
+            return False

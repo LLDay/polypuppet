@@ -1,22 +1,41 @@
 syntax = 'proto3';
 
+import "google/protobuf/empty.proto";
+
+message CredentialsUser {
+    string username = 1;
+    string password = 2;
+}
+
+message CredentialsAudience {
+    string platform = 1;
+    string release  = 2;
+    string token    = 3;
+    uint32 audience = 4;
+    uint64 uuid     = 5;
+}
+
 enum Role {
-    ADMIN = 0;
-    AUDIENCE = 1;
-    OTHER = 2;
-    STUDENT = 3;
+    AUDIENCE = 0;
+    OTHER    = 1;
+    STUDENT  = 2;
 }
 
 message Profile {
     Role role       = 1;
-    string username = 2;
-    string password = 3;
-    string flow     = 4;
-    string group    = 5;
-    uint32 audience = 6;
-    string platform = 7;
-    string release  = 8;
-    uint64 uuid     = 9;
+    string certname = 2;
+    string flow     = 3;
+    string group    = 4;
+    uint32 audience = 5;
+    bool ok         = 6;
+}
+
+message Certname {
+    string certname = 1;
+}
+
+message Autosign {
+    bool ok = 1;
 }
 
 enum TokenAction {
@@ -25,22 +44,25 @@ enum TokenAction {
     CLEAR = 2;
 }
 
-enum MessageType {
-    UNKNOWN  = 0;
-    STOP     = 1;
-    AUTOSIGN = 2;
-    LOGIN    = 3;
-    RESPONSE = 4;
-    TOKEN    = 5;
+message Token {
+    TokenAction taction = 1;
+    string token        = 2;
 }
 
-message Message {
-    MessageType type    = 1;
-    Profile profile     = 2;
-    TokenAction taction = 3;
-    bool ok             = 4;
+service RemoteConnection {
 
-    string certname     = 5;
-    string token        = 6;
-    string output       = 7;
+    rpc login_user(CredentialsUser) returns (Profile) {}
+
+    rpc login_audience(CredentialsAudience) returns (Profile) {}
+
+}
+
+service LocalConnection {
+
+    rpc manage_token(Token) returns (Token) {}
+
+    rpc autosign(Certname) returns (Autosign) {}
+
+    rpc stop(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+
 }
