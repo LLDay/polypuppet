@@ -3,10 +3,6 @@ import logging
 import sys
 
 
-def _concat(*args):
-    return ' '.join(str(arg) for arg in args)
-
-
 class _MessagesEn:
 
     def help_verbose():
@@ -52,22 +48,25 @@ class _MessagesEn:
         return 'Wrong credentials'
 
     def server_is_on(ip, port):
-        return _concat('Server is listening to', ip, 'with port', port)
+        return 'Server is listening to {0} with port {1}'.format(ip, port)
 
     def server_already_runned():
         return 'Server is already runned'
 
     def no_config_key(key):
-        return _concat('There is no key', key)
+        return 'There is no key {0}'.format(key)
+
+    def no_vm_named(vm_name):
+        return "Virtual machine with name '{0}' does not exist".format(vm_name)
 
     def cannot_change_key(key):
-        return _concat('You cannot explicitly change key', key)
+        return 'You cannot explicitly change key {0}'.format(key)
 
     def executable_not_exists(executable_name):
-        return _concat('Exetuable does not exist:', executable_name + '.', 'You should install it first')
+        return "Executable '{0}' does not exist".format(executable_name)
 
     def cannot_connect_to_server(ip, port):
-        return _concat('Cannot open connection to the server on', ip, 'with port', port)
+        return 'Cannot open connection to the server on {0} with port {1}'.format(ip, port)
 
     def cannot_create_config_file():
         return 'Cannot change config file because of low permissions'
@@ -75,23 +74,26 @@ class _MessagesEn:
     def cannot_create_token_file():
         return 'Cannot create token file because of low permissions'
 
+    def cannot_create_ca_file():
+        return 'Cannot create ca.pem file because of low permissions'
+
     def cannot_connect_to_cas():
         return 'Cannot connect to the CAS'
 
+    def try_to_update_certificate_from(domain):
+        return 'Loaded wrong certificate. Downloading ca certificate from {0}'.format(domain)
+
     def wait_for_cert(certname):
-        return _concat('Waiting for CSR from', certname)
+        return 'Waiting for CSR from {0}'.format(certname)
 
     def stop_waiting_for_cert(certname):
-        return _concat('Stop waiting for CSR from', certname)
+        return 'Stop waiting for CSR from {0}'.format(certname)
 
     def cert_is_known(certname):
-        return _concat('Puppetserver requested for known certname', certname)
+        return 'Puppetserver requested for known certname {0}'.format(certname)
 
     def cert_is_unknown(certname):
-        return _concat('Puppetserver requested for unknown certname', certname + '.', "It won't be signed")
-
-    def server_generated_token(token):
-        return _concat('Server has generated token', token)
+        return "Puppetserver requested for unknown certname {0}. It won't be signed".format(certname)
 
     def server_stopped():
         return 'Server stopped successfully'
@@ -104,6 +106,9 @@ class _MessagesEn:
 
     def cannot_generate_certificate():
         return 'Server cannot generate certificate'
+
+    def agent_login_error():
+        return 'Agent cannot setup puppet for work with server'
 
     def server_sends(message):
         return 'Server sends:\n' + str(message)

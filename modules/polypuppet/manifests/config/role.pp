@@ -9,7 +9,7 @@ class polypuppet::config::role(
       command => $hidden_command,
       path    => '/usr/bin:/usr/local/bin:/usr/sbin:/bin',
       user    => 'root',
-      unless  => "polypuppet config --test audience ${audience}"
+      unless  => "polypuppet test config audience ${audience}"
     }
   }
 

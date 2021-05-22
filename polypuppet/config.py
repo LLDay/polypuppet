@@ -71,7 +71,8 @@ class Config:
             'AGENT_CERTNAME': '',
             'SSLDIR': '',
             'SSL_CERT': '',
-            'SSL_PRIVATE': ''}
+            'SSL_PRIVATE': '',
+            'CONFDIR': CONFIG_DIR}
 
         if CONFIG_PATH.exists():
             read_config = configparser.ConfigParser()

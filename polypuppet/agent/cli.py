@@ -16,14 +16,23 @@ from polypuppet.server.server import Server
 
 
 @click.group()
-@click.option('-v', '--verbose', is_flag=True, help=Messages.help_verbose())
+@click.option('-v', '--verbose', count=True, help=Messages.help_verbose())
 @click.option('-q', '--quiet', is_flag=True, help=Messages.help_quiet())
 def cli(verbose, quiet):
     loglevel = logging.INFO
+    grpc_v = 'GRPC_VERBOSITY'
+    os.environ.get(grpc_v, 'NONE')
+
     if quiet:
         loglevel = logging.CRITICAL
-    elif verbose:
-        loglevel = logging.DEBUG
+
+    else:
+        if verbose > 0:
+            loglevel = logging.DEBUG
+        if verbose > 1:
+            os.environ.get(grpc_v, 'DEBUG')
+
+    coloredlogs.install(level=loglevel)
     set_clear_logs(loglevel)
 
 
@@ -34,6 +43,8 @@ def autosign(certname):
     has_certname = agent.autosign(certname)
     if not has_certname:
         sys.exit(1)
+
+# @cli.group('login')
 
 
 def check_login(response):
@@ -91,22 +102,43 @@ def server(daemon, restart, stop):
         start_server()
 
 
-@cli.command()
+@cli.command(name='config')
 @click.argument('key', required=False)
 @click.argument('value', required=False)
-@click.option('-t', '--test', is_flag=True)
-def config(key, test, value):
-    global_config = Config()
+def manage_config(key, value):
+    config = Config()
     if key is None:
-        for key, value in global_config.all().items():
+        for key, value in config.all().items():
             logging.info(key + '=' + value)
     elif value is None:
-        logging.info(global_config[key])
+        logging.info(config[key])
     else:
-        if not test:
-            global_config.restricted_set(key, value)
-        elif global_config[key] != value:
+        config.restricted_set(key, value)
+
+
+@cli.group(name='test')
+def group_test():
+    pass
+
+
+@group_test.command()
+@click.argument('key')
+@click.argument('value')
+def config(key, value):
+    config = Config()
+    try:
+        if config[key] != value:
             sys.exit(1)
+    except PolypuppetException:
+        sys.exit(1)
+
+
+@group_test.command()
+@click.argument('vm_name')
+def vm(vm_name):
+    from polypuppet.agent.vagrant import Vagrant
+    vagrant = Vagrant()
+    vagrant.is_created(vm_name)
 
 
 @cli.command()

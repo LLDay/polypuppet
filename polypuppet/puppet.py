@@ -3,7 +3,10 @@ import pathlib
 import subprocess
 from shutil import which
 
+import requests
+import urllib3
 from polypuppet.config import Config
+from polypuppet.definitions import CA_PATH
 from polypuppet.exception import PolypuppetException
 from polypuppet.messages import Messages
 
@@ -53,6 +56,29 @@ class Puppet(PuppetBase):
             return self._run('config print --section', section, key)
         return self._run('config set', key, value, '--section', section)
 
+    def download_ca(self):
+        config = Config()
+        domain = config['SERVER_DOMAIN']
+
+        # TODO: change verify=True and remove warning disabling when get trusted CA
+        url = 'https://{0}:8140/puppet-ca/v1/certificate/{0}'.format(domain)
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        response = requests.get(url, verify=False)
+
+        try:
+            with open(CA_PATH, 'w', encoding='UTF-8') as ca_file:
+                ca_file.write(response.text)
+        except Exception as exception:
+            exception_message = Messages.cannot_create_ca_file()
+            raise PolypuppetException(exception_message) from exception
+
+    def get_ca(self):
+        if not CA_PATH.exists():
+            self.download_ca()
+
+        with open(CA_PATH, 'rb') as ca:
+            return ca.read()
+
     def ssldir(self):
         config = Config()
         ssldir = config['SSLDIR']
@@ -76,7 +102,7 @@ class Puppet(PuppetBase):
         command = ['agent --test --no-daemonize']
         if noop:
             command.append('--noop')
-        return self._run(*command)
+        return self._run(*command, returncode=True) == 0
 
     def service(self, service_name, ensure=True, enable=None):
         if enable is None:

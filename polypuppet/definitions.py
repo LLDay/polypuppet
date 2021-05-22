@@ -11,7 +11,9 @@ else:
 
 CONFIG_DIR = Path(CONFIG_DIR)
 CONFIG_PATH = Path(CONFIG_DIR / 'config.ini')
+
 TOKEN_PATH = Path(CONFIG_DIR / 'token')
+CA_PATH = Path(CONFIG_DIR / 'ca.pem')
 
 PUPPET_SETTINGS_PATH_U = Path('/etc/default/puppetserver')
 PUPPET_SETTINGS_PATH_C = Path('/etc/sysconfig/puppetserver')

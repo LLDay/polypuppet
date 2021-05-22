@@ -1,5 +1,4 @@
 import logging
-import os
 import ssl
 from concurrent import futures
 from pathlib import Path
@@ -32,7 +31,6 @@ class Server(LocalConnection, RemoteConnection):
         self.puppetserver = PuppetServer()
         self.certlist = CertList()
         self.token = Token()
-        os.environ['GRPC_VERBOSITY'] = 'NONE'
 
         thread_pool = futures.ThreadPoolExecutor(max_workers=2)
         options = [('grpc.so_reuseport', 0)]

@@ -19,6 +19,7 @@ class Agent:
     def __init__(self):
         self.config = Config()
         self.connectin_timeout = 0.5
+        self.puppet = Puppet()
 
     #
     # Server connection
@@ -39,23 +40,23 @@ class Agent:
         return LocalConnectionStub(channel)
 
     def get_secure_channel(self, domain, port):
-        # Temporary solution with self signed certificates
-        # TODO: Remove server_cert and leave ssl_channel_credentials arguments
-        # list empty when the server become trusted
-        try:
-            server_cert = ssl.get_server_certificate((domain, port))
-        except Exception as exception:
-            exception_message = Messages.cannot_connect_to_server(domain, port)
-            raise PolypuppetException(exception_message) from exception
-
-        credentials = grpc.ssl_channel_credentials(server_cert.encode())
+        server_cert = self.puppet.get_ca()
+        credentials = grpc.ssl_channel_credentials(server_cert)
         return grpc.secure_channel(domain + ':' + str(port), credentials)
 
     def get_remote_stub(self):
         domain = self.config['SERVER_DOMAIN']
         port = self.config['SERVER_PORT']
         channel = self.get_secure_channel(domain, port)
-        self.check_connection(channel, domain, port)
+
+        try:
+            self.check_connection(channel, domain, port)
+        except PolypuppetException:
+            logging.warning(Messages.try_to_update_certificate_from(domain))
+            self.puppet.download_ca()
+            channel = self.get_secure_channel(domain, port)
+            self.check_connection(channel, domain, port)
+
         return RemoteConnectionStub(channel)
 
     def _token_action(self, action):
@@ -86,10 +87,9 @@ class Agent:
     #
 
     def on_login(self, response):
-        puppet = Puppet()
         certname = response.certname
 
-        ssldir = puppet.ssldir()
+        ssldir = self.puppet.ssldir()
         ssl_cert = ssldir / ('certs/' + certname + '.pem')
         ssl_private = ssldir / ('private_keys/' + certname + '.pem')
 
@@ -101,8 +101,8 @@ class Agent:
         self.config['STUDENT_FLOW'] = response.flow
         self.config['STUDENT_GROUP'] = response.group
 
-        puppet.certname(response.certname)
-        puppet.sync(noop=True)
+        self.puppet.certname(response.certname)
+        return self.puppet.sync(noop=True)
 
     def audience(self, number, token):
         os_name = platform.system()
@@ -131,7 +131,8 @@ class Agent:
         remote_stub = self.get_remote_stub()
         response = remote_stub.login_user(message)
         if response.ok:
-            self.on_login(response)
+            if not self.on_login(response):
+                raise PolypuppetException(Messages.agent_login_error())
         return response.ok
 
     def stop_server(self):

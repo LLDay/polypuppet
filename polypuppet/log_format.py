@@ -2,14 +2,12 @@ import logging
 
 import coloredlogs
 
-coloredlogs.install()
-
 
 def _setup_log(level=None, fmt=coloredlogs.DEFAULT_LOG_FORMAT):
     formatter = coloredlogs.ColoredFormatter(fmt)
 
     root = logging.getLogger()
-    root.level = level or root.level
+    root.setLevel(logging.DEBUG)
     handler = root.handlers[0]
     handler.setFormatter(formatter)
 
