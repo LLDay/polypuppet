@@ -6,6 +6,7 @@ PUPPET_CONF_DIR = '/etc/puppetlabs'
 server:
 	./scripts/setup_server.sh
 	python3 -m pip install .
+	install -m644 ./systemd/polypuppet.service /etc/systemd/system/
 
 agent:
 	./scripts/setup_agent.sh

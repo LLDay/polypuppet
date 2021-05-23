@@ -11,8 +11,6 @@ from polypuppet.agent.agent import Agent
 from polypuppet.agent.vagrant import Vagrant
 from polypuppet.exception import PolypuppetException
 from polypuppet.messages import Messages
-from polypuppet.server.server import main as server_main
-from polypuppet.server.server import Server
 
 
 @click.group()
@@ -21,13 +19,14 @@ def cli(verbose):
     grpc_v = 'GRPC_VERBOSITY'
     os.environ[grpc_v] = 'NONE'
 
-    loglevel = logging.INFO
+    log_level = logging.INFO
     if verbose > 0:
-        loglevel = logging.DEBUG
+        log_level = logging.DEBUG
     if verbose > 1:
         os.environ[grpc_v] = 'DEBUG'
 
-    logging.root.setLevel(loglevel)
+    log_format = '%(message)s'
+    logging.basicConfig(format=log_format, level=log_level)
 
 
 @cli.command()
@@ -76,7 +75,14 @@ def audience(number, token):
 
 def start_server():
     try:
+        # This prevents error messages on operating systems that are not supported for the server
+        from polypuppet.server.server import main as server_main
         server_main()
+
+    except ModuleNotFoundError:
+        out.critical(Messages.unsupported_os())
+        sys.exit(1)
+
     except PolypuppetException as pe:
         out.critical(pe.message)
         sys.exit(1)

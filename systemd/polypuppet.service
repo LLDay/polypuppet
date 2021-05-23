@@ -1,0 +1,12 @@
+[Unit]
+Description=Polypuppet Service
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/polypuppet server
+Restart=on-failure
+Type=notify
+User=root
+
+[Install]
+WantedBy=default.target

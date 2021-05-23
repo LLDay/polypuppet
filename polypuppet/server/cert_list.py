@@ -10,7 +10,7 @@ from polypuppet.messages import Messages
 class CertList:
     def __init__(self):
         config = Config()
-        self.certlist = set()
+        self.certlist = list()
         self.timeout = int(config['CERT_WAITTIME'])
         self.scheduler = sched.scheduler(time.monotonic, time.sleep)
         self.lock = Lock()
@@ -25,7 +25,7 @@ class CertList:
 
     def append(self, certname):
         self.scheduler.run(blocking=False)
-        self.certlist.add(certname)
+        self.certlist.append(certname)
         logging.info(Messages.wait_for_cert(certname))
         self.scheduler.enter(self.timeout, 1, self.remove, [(certname)])
 

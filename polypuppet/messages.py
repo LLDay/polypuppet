@@ -80,6 +80,9 @@ class _MessagesEn:
     def cannot_connect_to_cas():
         return 'Cannot connect to the CAS'
 
+    def unsupported_os():
+        return 'Server must be runned on machine with systemd'
+
     def try_to_update_certificate_from(domain):
         return '''Cannot establish secure connection with server.
         It may happen because of invalid CA. Downloading ca certificate from {0}'''.format(domain)

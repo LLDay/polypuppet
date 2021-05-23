@@ -1,9 +1,11 @@
 import logging
+import signal
 import ssl
 from concurrent import futures
 from pathlib import Path
 
 import grpc
+import systemd.daemon
 from google.protobuf.empty_pb2 import Empty
 from polypuppet import Config
 from polypuppet import proto
@@ -99,10 +101,17 @@ class Server(LocalConnection, RemoteConnection):
             self.token.clear()
         return response
 
-    def stop(self, request, context):
+    def _do_stop(self):
+        systemd.daemon.notify('STOPPING=1')
         self.local_server.stop(5)
         self.remote_server.stop(5)
+
+    def stop(self, request, context):
+        self._do_stop()
         return Empty()
+
+    def _signal_handler(self, *args):
+        self._do_stop()
 
     #
     # Certificates
@@ -160,6 +169,9 @@ class Server(LocalConnection, RemoteConnection):
 
         self.local_server.start()
         self.remote_server.start()
+
+        systemd.daemon.notify('READY=1')
+        signal.signal(signal.SIGINT, self._signal_handler)
 
         logging.info(Messages.server_is_on(control_ip, control_port))
         logging.info(Messages.server_is_on(server_ip, server_port))
