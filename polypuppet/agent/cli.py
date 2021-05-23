@@ -19,13 +19,13 @@ from polypuppet.server.server import Server
 @click.option('-v', '--verbose', count=True, help=Messages.help_verbose())
 def cli(verbose):
     grpc_v = 'GRPC_VERBOSITY'
-    os.environ.get(grpc_v, 'NONE')
+    os.environ[grpc_v] = 'NONE'
 
     loglevel = logging.INFO
     if verbose > 0:
         loglevel = logging.DEBUG
     if verbose > 1:
-        os.environ.get(grpc_v, 'DEBUG')
+        os.environ[grpc_v] = 'DEBUG'
 
     logging.root.setLevel(loglevel)
 
@@ -65,7 +65,7 @@ def user(username, password):
     check_login(response)
 
 
-@cli.command()
+@login_group.command()
 @click.argument('number', required=True, type=click.INT)
 @click.argument('token', required=True, type=click.STRING)
 def audience(number, token):

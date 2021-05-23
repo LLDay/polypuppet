@@ -16,7 +16,12 @@ class polypuppet::config::ini (
     },
   }
 
-  $confdir = $::polypuppet['confdir']
+  if $polypuppet::polypuppet_confdir == undef {
+    $confdir = $::polypuppet['confdir']
+  } else {
+    $confdir = $polypuppet::polypuppet_confdir
+  }
+
   $polypuppet_config_name = 'config.ini'
   $polypuppet_config_path = "${confdir}/${polypuppet_config_name}"
 

@@ -1,3 +1,8 @@
 ---
 # init.pp
+
+# This argument is redundant on a machine with installed polypuppet.
+# But on unitialized machines, puppet don't have the polypuppet facts.
+polypuppet::polypuppet_confdir: "C:/ProgramData/polypuppet"
+
 polypuppet::puppet_confdir: "C:/ProgramData/PuppetLabs"

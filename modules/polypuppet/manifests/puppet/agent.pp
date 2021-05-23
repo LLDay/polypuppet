@@ -6,17 +6,25 @@ class polypuppet::puppet::agent (
 
   $codedir = "${confdir}/code"
 
-  if ($autostart) {
+  if $autostart {
     $runmode = 'server'
   } else {
     $runmode = 'none'
   }
 
-  class { '::puppet':
-    server       => false,
-    runmode      => $runmode,
-    codedir      => $codedir,
-    puppetmaster => $server_domain,
+  $audience = $polypuppet::audience
+
+  # This condition equals false when admin explicitly change audience number.
+  # It's necessary because '::puppet' class restores previous certname after changing certname by polypuppet.
+  if $audience == undef or $audience == Integer($::polypuppet['audience']) {
+
+    class { '::puppet':
+      server       => false,
+      runmode      => $runmode,
+      codedir      => $codedir,
+      puppetmaster => $server_domain,
+    }
+
   }
 
 }

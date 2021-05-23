@@ -101,7 +101,7 @@ class Puppet(PuppetBase):
         if value is None:
             return self.config('certname')
         self.clean_certname()
-        return self.config('certname', value, section='agent')
+        return self.config('certname', value, section='main')
 
     def sync(self, noop=False):
         command = ['agent --test --no-daemonize']
