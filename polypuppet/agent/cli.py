@@ -5,11 +5,11 @@ import os
 import sys
 
 import click
-import coloredlogs
+import polypuppet.agent.output as out
 from polypuppet import Config
 from polypuppet.agent.agent import Agent
+from polypuppet.agent.vagrant import Vagrant
 from polypuppet.exception import PolypuppetException
-from polypuppet.log_format import set_clear_logs
 from polypuppet.messages import Messages
 from polypuppet.server.server import main as server_main
 from polypuppet.server.server import Server
@@ -17,23 +17,17 @@ from polypuppet.server.server import Server
 
 @click.group()
 @click.option('-v', '--verbose', count=True, help=Messages.help_verbose())
-@click.option('-q', '--quiet', is_flag=True, help=Messages.help_quiet())
-def cli(verbose, quiet):
-    loglevel = logging.INFO
+def cli(verbose):
     grpc_v = 'GRPC_VERBOSITY'
     os.environ.get(grpc_v, 'NONE')
 
-    if quiet:
-        loglevel = logging.CRITICAL
+    loglevel = logging.INFO
+    if verbose > 0:
+        loglevel = logging.DEBUG
+    if verbose > 1:
+        os.environ.get(grpc_v, 'DEBUG')
 
-    else:
-        if verbose > 0:
-            loglevel = logging.DEBUG
-        if verbose > 1:
-            os.environ.get(grpc_v, 'DEBUG')
-
-    coloredlogs.install(level=loglevel)
-    set_clear_logs(loglevel)
+    logging.root.setLevel(loglevel)
 
 
 @cli.command()
@@ -44,22 +38,29 @@ def autosign(certname):
     if not has_certname:
         sys.exit(1)
 
-# @cli.group('login')
+
+@cli.group('login')
+def login_group():
+    pass
 
 
 def check_login(response):
     if response:
-        logging.info(Messages.logged_in())
+        out.info(Messages.logged_in())
     else:
-        logging.warning(Messages.not_logged_in())
+        out.warning(Messages.not_logged_in())
         sys.exit(1)
 
 
-@cli.command()
-@click.option('-u', '--username', prompt=True, help=Messages.help_username())
-@click.password_option('-p', '--password', confirmation_prompt=False, help=Messages.help_password())
-def login(username, password):
+@login_group.command()
+@click.argument('username', required=False)
+@click.argument('password', required=False)
+def user(username, password):
     agent = Agent()
+    if username is None:
+        username = click.prompt('Username')
+    if password is None:
+        password = click.prompt('Password', hide_input=True)
     response = agent.login(username, password)
     check_login(response)
 
@@ -77,7 +78,8 @@ def start_server():
     try:
         server_main()
     except PolypuppetException as pe:
-        pe.print_with_exit()
+        out.critical(pe.message)
+        sys.exit(1)
 
 
 @cli.command(help=Messages.help_server())
@@ -91,7 +93,7 @@ def server(daemon, restart, stop):
 
     if stop:
         if is_stopped:
-            logging.info('Server stopped')
+            out.info('Server stopped')
         return
 
     if daemon:
@@ -109,19 +111,19 @@ def manage_config(key, value):
     config = Config()
     if key is None:
         for key, value in config.all().items():
-            logging.info(key + '=' + value)
+            out.info(key + '=' + value)
     elif value is None:
-        logging.info(config[key])
+        out.info(config[key])
     else:
         config.restricted_set(key, value)
 
 
 @cli.group(name='test')
-def group_test():
+def test_group():
     pass
 
 
-@group_test.command()
+@test_group.command()
 @click.argument('key')
 @click.argument('value')
 def config(key, value):
@@ -133,10 +135,9 @@ def config(key, value):
         sys.exit(1)
 
 
-@group_test.command()
+@test_group.command()
 @click.argument('vm_name')
 def vm(vm_name):
-    from polypuppet.agent.vagrant import Vagrant
     vagrant = Vagrant()
     vagrant.is_created(vm_name)
 
@@ -152,21 +153,22 @@ def token(new, clear):
 
     if new:
         server_token = agent.update_token()
-        logging.info(server_token)
+        out.info(server_token)
     else:
         server_token = agent.get_token()
         if server_token != str():
-            logging.info(server_token)
+            out.info(server_token)
         else:
-            logging.warning(Messages.token_not_generated())
+            out.warning(Messages.token_not_generated())
             sys.exit(1)
 
 
 def main():
     try:
         cli()
-    except PolypuppetException as exception:
-        exception.print_with_exit()
+    except PolypuppetException as pe:
+        out.critical(pe.message)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

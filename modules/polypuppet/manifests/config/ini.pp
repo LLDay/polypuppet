@@ -1,6 +1,5 @@
 class polypuppet::config::ini (
   $cert_waittime = $polypuppet::polypuppet_cert_waittime,
-  $confdir       = $polypuppet::polypuppet_confdir,
   $control_port  = $polypuppet::polypuppet_control_port,
   $server_domain = $polypuppet::puppet_server_domain,
   $server_port   = $polypuppet::polypuppet_server_port,
@@ -17,8 +16,9 @@ class polypuppet::config::ini (
     },
   }
 
+  $confdir = $::polypuppet['confdir']
   $polypuppet_config_name = 'config.ini'
-  $polypuppet_config_path = "${$confdir}/${polypuppet_config_name}"
+  $polypuppet_config_path = "${confdir}/${polypuppet_config_name}"
 
   file { $confdir:
     ensure => directory,

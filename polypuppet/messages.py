@@ -81,7 +81,8 @@ class _MessagesEn:
         return 'Cannot connect to the CAS'
 
     def try_to_update_certificate_from(domain):
-        return 'Loaded wrong certificate. Downloading ca certificate from {0}'.format(domain)
+        return '''Cannot establish secure connection with server.
+        It may happen because of invalid CA. Downloading ca certificate from {0}'''.format(domain)
 
     def wait_for_cert(certname):
         return 'Waiting for CSR from {0}'.format(certname)

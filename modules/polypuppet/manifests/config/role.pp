@@ -7,8 +7,7 @@ class polypuppet::config::role(
     $hidden_command = Sensitive("polypuppet audience ${audience} ${token}")
     exec { 'setup audience number':
       command => $hidden_command,
-      path    => '/usr/bin:/usr/local/bin:/usr/sbin:/bin',
-      user    => 'root',
+      path    => $::path,
       unless  => "polypuppet test config audience ${audience}"
     }
   }

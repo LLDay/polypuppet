@@ -63,7 +63,12 @@ class Puppet(PuppetBase):
         # TODO: change verify=True and remove warning disabling when get trusted CA
         url = 'https://{0}:8140/puppet-ca/v1/certificate/{0}'.format(domain)
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        response = requests.get(url, verify=False)
+
+        try:
+            response = requests.get(url, verify=False)
+        except Exception as exception:
+            exception_message = Messages.cannot_connect_to_server(domain, 8140)
+            raise PolypuppetException(exception_message) from exception
 
         try:
             with open(CA_PATH, 'w', encoding='UTF-8') as ca_file:

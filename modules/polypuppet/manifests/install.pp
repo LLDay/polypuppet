@@ -1,9 +1,9 @@
-class polypuppet::install {
+class polypuppet::install inherits polypuppet::defs {
 
   if $::operatingsystem == 'windows' {
     include chocolatey
 
-    if (versioncmp($facts['os']['release']['major'], '8') < 0) {
+    if (versioncmp($::os['release']['major'], '8') < 0) {
       $python_version = '3.8.10'
     } else {
       $python_version = 'latest'
@@ -11,13 +11,13 @@ class polypuppet::install {
 
     package { 'python':
       ensure          => $python_version,
-      provider        => 'chocolatey',
+      provider        => $polypuppet::defs::provider,
       install_options => [ '--install-arguments', { 'PrependPath' => '1' } ],
     }
 
   } else {
 
-    case $::facts['os']['name'] {
+    case $::os['name'] {
       'ArchLinux': {
         $python_package_name = 'python'
         $pip_package_name = 'python-pip'
@@ -30,11 +30,13 @@ class polypuppet::install {
     }
 
     package { $python_package_name:
-      ensure =>  installed,
+      ensure   => installed,
+      provider => $polypuppet::defs::provider,
     }
 
     package { $pip_package_name:
-      ensure => installed,
+      ensure   => installed,
+      provider => $polypuppet::defs::provider,
     }
 
     -> package { 'polypuppet':

@@ -1,6 +1,6 @@
 ---
+polypuppet::puppet_role: 'agent'
 polypuppet::polypuppet_cert_waittime: 90
-polypuppet::polypuppet_confdir: "/etc/polypuppet"
 polypuppet::polypuppet_control_port: 8139
 polypuppet::polypuppet_server_port: 8139
 

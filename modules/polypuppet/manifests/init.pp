@@ -4,7 +4,6 @@ class polypuppet (
   Integer $polypuppet_cert_waittime,
   Integer $polypuppet_control_port,
   Integer $polypuppet_server_port,
-  String  $polypuppet_confdir,
 
   Variant[Integer, Undef] $polypuppet_audience = undef,
   Variant[String, Undef]  $polypuppet_token = undef,
@@ -20,6 +19,7 @@ class polypuppet (
   String $server_jvm_max_heap_size,
 ) {
 
+  include polypuppet::facter
   contain polypuppet::install
   contain polypuppet::config::ini
   contain polypuppet::puppet::setup
