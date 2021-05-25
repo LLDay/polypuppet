@@ -19,7 +19,8 @@ class CertList:
         with self.lock:
             if certname in self.certlist:
                 logging.info(Messages.stop_waiting_for_cert(certname))
-                self.certlist.remove(certname)
+                def filter_rule(c): return c != certname
+                self.certlist = list(filter(filter_rule, self.certlist))
                 return True
             return False
 

@@ -7,6 +7,7 @@ import uuid
 import grpc
 from google.protobuf.empty_pb2 import Empty
 from polypuppet import proto
+from polypuppet.agent.pc import Pc
 from polypuppet.config import Config
 from polypuppet.exception import PolypuppetException
 from polypuppet.messages import Messages
@@ -54,6 +55,7 @@ class Agent:
         except PolypuppetException:
             logging.warning(Messages.try_to_update_certificate_from(domain))
             self.puppet.download_ca()
+            channel.close()
             channel = self.get_secure_channel(domain, port)
             self.check_connection(channel, domain, port)
 
@@ -95,6 +97,7 @@ class Agent:
 
         self.config['AGENT_CERTNAME'] = certname
         self.config['AUDIENCE'] = str(response.audience)
+        self.config['BUILDING'] = str(response.building)
         self.config['ROLE'] = proto.Role.Name(response.role).lower()
         self.config['SSL_CERT'] = ssl_cert.as_posix()
         self.config['SSL_PRIVATE'] = ssl_private.as_posix()
@@ -104,18 +107,16 @@ class Agent:
         self.puppet.certname(response.certname)
         return self.puppet.sync(noop=True)
 
-    def audience(self, number, token):
-        os_name = platform.system()
-        release = platform.release()
-        if os_name == str():
-            os_name = os.name
-
-        message = proto.CredentialsAudience()
+    def audience(self, building, number, token):
+        message = proto.Audience()
         message.token = token
+        message.building = building
         message.audience = number
-        message.uuid = uuid.getnode()
-        message.platform = os_name
-        message.release = release
+
+        pc = Pc()
+        message.pc.uuid = pc.uuid
+        message.pc.platform = pc.platform
+        message.pc.release = pc.release
 
         remote_stub = self.get_remote_stub()
         response = remote_stub.login_audience(message)
@@ -124,7 +125,7 @@ class Agent:
         return response.ok
 
     def login(self, username, password):
-        message = proto.CredentialsUser()
+        message = proto.User()
         message.username = username
         message.password = password
 

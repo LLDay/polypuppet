@@ -44,7 +44,7 @@ class Config:
         return key in self.flat
 
     def restricted_set(self, key, value):
-        for k in ['agent', 'server']:
+        for k in ['server']:
             if key in self.config[k]:
                 self[key] = value
                 return
@@ -58,12 +58,12 @@ class Config:
 
         default_config['server'] = {
             'SERVER_DOMAIN': 'server.poly.puppet.com',
-            'SERVER_PORT': 8139}
-        default_config['agent'] = {
+            'SERVER_PORT': 8139,
             'CONTROL_PORT': 8139,
             'CERT_WAITTIME': 90}
         default_config['profile'] = {
             'AUDIENCE': '',
+            'BUILDING': '',
             'ROLE': '',
             'STUDENT_FLOW': '',
             'STUDENT_GROUP': ''}

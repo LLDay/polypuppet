@@ -1,12 +1,22 @@
+from dataclasses import dataclass
+
+from polypuppet import proto
+
+
+@dataclass
 class Audience:
-    def __init__(self, number, platform, release, uuid):
-        self.number = str(number)
-        self.platform = platform
-        self.release = release
-        self.uuid = hex(uuid)[2:]
+    building: int = -1
+    audience: int = -1
+    token: str = str()
+    pc: proto.PC = proto.PC()
+
+    def deserialize(self, message):
+        self.building = message.building
+        self.audience = message.audience
+        self.token = message.token
+        self.pc = message.pc
 
     def certname(self):
-        components = ['audience', self.number,
-                      self.platform, self.release, self.uuid]
-        components = [c.lower() for c in components if len(c) > 0]
-        return '.'.join(components)
+        components = ['audience', self.building, self.audience,
+                      self.pc.platform, self.pc.release, self.pc.uuid]
+        return '.'.join(str(c) for c in components if c != str())

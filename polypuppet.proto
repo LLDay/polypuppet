@@ -2,23 +2,28 @@ syntax = 'proto3';
 
 import "google/protobuf/empty.proto";
 
-message CredentialsUser {
+message PC {
+    uint64 uuid     = 1;
+    string platform = 2;
+    string release  = 3;
+}
+
+message User {
     string username = 1;
     string password = 2;
 }
 
-message CredentialsAudience {
-    string platform = 1;
-    string release  = 2;
-    string token    = 3;
-    uint32 audience = 4;
-    uint64 uuid     = 5;
+message Audience {
+    PC pc           = 1;
+    uint32 building = 2;
+    uint32 audience = 3;
+    string token    = 4;
 }
 
 enum Role {
     AUDIENCE = 0;
-    OTHER    = 1;
-    STUDENT  = 2;
+    STUDENT  = 1;
+    OTHER    = 2;
 }
 
 message Profile {
@@ -26,8 +31,9 @@ message Profile {
     string certname = 2;
     string flow     = 3;
     string group    = 4;
-    uint32 audience = 5;
-    bool ok         = 6;
+    uint32 building = 5;
+    uint32 audience = 6;
+    bool ok         = 7;
 }
 
 message Certname {
@@ -51,9 +57,9 @@ message Token {
 
 service RemoteConnection {
 
-    rpc login_user(CredentialsUser) returns (Profile) {}
+    rpc login_user(User) returns (Profile) {}
 
-    rpc login_audience(CredentialsAudience) returns (Profile) {}
+    rpc login_audience(Audience) returns (Profile) {}
 
 }
 

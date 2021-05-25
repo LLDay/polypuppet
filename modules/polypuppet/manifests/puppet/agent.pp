@@ -1,10 +1,7 @@
 class polypuppet::puppet::agent (
   $autostart     = $polypuppet::agent_autostart,
-  $confdir       = $polypuppet::puppet_confdir,
   $server_domain = $polypuppet::puppet_server_domain,
 ) {
-
-  $codedir = "${confdir}/code"
 
   if $autostart {
     $runmode = 'server'
@@ -12,16 +9,28 @@ class polypuppet::puppet::agent (
     $runmode = 'none'
   }
 
+  $building = $polypuppet::building
   $audience = $polypuppet::audience
+
+  if $audience == undef {
+    $allow_puppet = true
+  } elsif ! has_key($::facts, 'polypuppet') {
+    $allow_puppet = true
+  } elsif $::polypuppet['audience'] == '' or $::polypuppet['building'] == '' {
+    $allow_puppet = true
+  } elsif $audience == Integer($::polypuppet['audience']) and $building == Integer($::polypuppet['building']) {
+    $allow_puppet = true
+  } else {
+    $allow_puppet = false
+  }
 
   # This condition equals false when admin explicitly change audience number.
   # It's necessary because '::puppet' class restores previous certname after changing certname by polypuppet.
-  if $audience == undef or !has_key($::facts, 'polypuppet') or $audience == Integer($::polypuppet['audience']) {
+  if $allow_puppet {
 
     class { '::puppet':
       server       => false,
       runmode      => $runmode,
-      codedir      => $codedir,
       puppetmaster => $server_domain,
     }
 

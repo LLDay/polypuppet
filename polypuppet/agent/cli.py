@@ -65,11 +65,12 @@ def user(username, password):
 
 
 @login_group.command()
+@click.argument('building', required=True, type=click.INT)
 @click.argument('number', required=True, type=click.INT)
 @click.argument('token', required=True, type=click.STRING)
-def audience(number, token):
+def audience(building, number, token):
     agent = Agent()
-    response = agent.audience(number, token)
+    response = agent.audience(building, number, token)
     check_login(response)
 
 
@@ -99,7 +100,7 @@ def server(daemon, restart, stop):
 
     if stop:
         if is_stopped:
-            out.info('Server stopped')
+            out.info(Messages.server_stopped())
         return
 
     if daemon:
@@ -129,10 +130,19 @@ def test_group():
     pass
 
 
-@test_group.command()
+@test_group.command(name='audience')
+@click.argument('building')
+@click.argument('audience')
+def test_audience(building, audience):
+    config = Config()
+    if config['AUDIENCE'] != audience or config['BUILDING'] != building:
+        sys.exit(1)
+
+
+@test_group.command(name='config')
 @click.argument('key')
 @click.argument('value')
-def config(key, value):
+def test_config(key, value):
     config = Config()
     try:
         if config[key] != value:

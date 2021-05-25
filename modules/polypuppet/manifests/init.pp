@@ -5,6 +5,7 @@ class polypuppet (
   Integer $polypuppet_control_port,
   Integer $polypuppet_server_port,
 
+  Variant[Integer, Undef] $building = undef,
   Variant[Integer, Undef] $audience = undef,
   Variant[String, Undef]  $token = undef,
 
@@ -19,9 +20,8 @@ class polypuppet (
 ) {
 
   include polypuppet::facter
-  contain polypuppet::install
-  contain polypuppet::config::ini
-  contain polypuppet::puppet::setup
-  contain polypuppet::config::role
+  include polypuppet::install
+  include polypuppet::config
+  include polypuppet::puppet::setup
 
 }

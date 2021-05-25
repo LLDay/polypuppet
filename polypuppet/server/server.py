@@ -31,6 +31,7 @@ class Server(LocalConnection, RemoteConnection):
         self.puppetserver = PuppetServer()
         self.certlist = CertList()
         self.token = Token()
+        self.timeout = 5
 
         thread_pool = futures.ThreadPoolExecutor(max_workers=2)
         options = [('grpc.so_reuseport', 0)]
@@ -70,14 +71,15 @@ class Server(LocalConnection, RemoteConnection):
         profile = proto.Profile()
         token = self.token
         if not token.empty() and credentials.token == token:
-            audience = Audience(credentials.audience, credentials.platform,
-                                credentials.release, credentials.uuid)
+            audience = Audience()
+            audience.deserialize(credentials)
 
             certname = audience.certname()
             profile.ok = True
             profile.role = proto.AUDIENCE
             profile.certname = certname
             profile.audience = credentials.audience
+            profile.building = credentials.building
             self.wait_for_certificate(certname)
         return profile
 
@@ -103,14 +105,14 @@ class Server(LocalConnection, RemoteConnection):
 
     def _do_stop(self):
         systemd.daemon.notify('STOPPING=1')
-        self.local_server.stop(5)
-        self.remote_server.stop(5)
+        self.local_server.stop(self.timeout)
+        self.remote_server.stop(self.timeout)
 
-    def stop(self, request, context):
+    def stop(self, request, _):
         self._do_stop()
         return Empty()
 
-    def _signal_handler(self, *args):
+    def _signal_handler(self, *_):
         self._do_stop()
 
     #
