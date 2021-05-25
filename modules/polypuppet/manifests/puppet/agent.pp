@@ -16,7 +16,7 @@ class polypuppet::puppet::agent (
 
   # This condition equals false when admin explicitly change audience number.
   # It's necessary because '::puppet' class restores previous certname after changing certname by polypuppet.
-  if $audience == undef or $audience == Integer($::polypuppet['audience']) {
+  if $audience == undef or !has_key($::facts, 'polypuppet') or $audience == Integer($::polypuppet['audience']) {
 
     class { '::puppet':
       server       => false,

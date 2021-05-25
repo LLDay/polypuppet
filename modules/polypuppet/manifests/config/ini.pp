@@ -3,7 +3,7 @@ class polypuppet::config::ini (
   $control_port  = $polypuppet::polypuppet_control_port,
   $server_domain = $polypuppet::puppet_server_domain,
   $server_port   = $polypuppet::polypuppet_server_port,
-) {
+) inherits polypuppet::defs {
 
   $ini_content = {
     'server'  => {
@@ -16,12 +16,7 @@ class polypuppet::config::ini (
     },
   }
 
-  if $polypuppet::polypuppet_confdir == undef {
-    $confdir = $::polypuppet['confdir']
-  } else {
-    $confdir = $polypuppet::polypuppet_confdir
-  }
-
+  $confdir = $polypuppet::defs::polypuppet_confdir
   $polypuppet_config_name = 'config.ini'
   $polypuppet_config_path = "${confdir}/${polypuppet_config_name}"
 

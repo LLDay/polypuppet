@@ -4,14 +4,12 @@ class polypuppet (
   Integer $polypuppet_cert_waittime,
   Integer $polypuppet_control_port,
   Integer $polypuppet_server_port,
-  Variant[String, Undef] $polypuppet_confdir,
 
   Variant[Integer, Undef] $audience = undef,
   Variant[String, Undef]  $token = undef,
 
   Boolean $enable_foreman,
   Stdlib::HTTPUrl $repository,
-  String $puppet_confdir,
   String $puppet_server_domain,
 
   Boolean $agent_autostart,
