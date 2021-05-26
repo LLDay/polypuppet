@@ -22,7 +22,7 @@ def authenticate(username, password):
 
     session = HTMLSession()
     try:
-        response = session.post('https://cas.spbstu.ru/login', payload)
+        response = session.post('https://cas.spbstu.ru/login', payload, timeout=5)
     except Exception as exception:
         exception_message = Messages.cannot_connect_to_cas()
         raise PolypuppetException(exception_message) from exception

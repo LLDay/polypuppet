@@ -65,7 +65,7 @@ class Puppet(PuppetBase):
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         try:
-            response = requests.get(url, verify=False)
+            response = requests.get(url, verify=False, timeout=5)
         except Exception as exception:
             exception_message = Messages.cannot_connect_to_server(domain, 8140)
             raise PolypuppetException(exception_message) from exception
