@@ -3,20 +3,38 @@ version: 5
 
 defaults:
   datadir: data
-  data_hash: yaml_data
+  data_hash: hocon_data
 
 hierarchy:
+  - name: "Specific node with OS data"
+    path: "nodes/%{trusted.certname}/%{os.name}.conf"
+
   - name: "Specific node data"
-    path: "nodes/%{trusted.certname}.yaml"
+    path: "nodes/%{trusted.certname}.conf"
+
+  - name: "Students group with OS data"
+    path: "students/%{facts.polypuppet.student_flow}/%{facts.polypuppet.student_group}/%{os.name}.conf"
 
   - name: "Students group data"
-    path: "groups/%{facts.polypuppet.student_flow}/%{facts.polypuppet.student_group}.yaml"
+    path: "students/%{facts.polypuppet.student_flow}/%{facts.polypuppet.student_group}.conf"
 
-  - name: "Students flow data"
-    path: "groups/%{facts.polypuppet.student_flow}.yaml"
+  - name: "Students flow with OS data"
+    path: "students/%{facts.polypuppet.student_flow}/%{os.name}.conf"
+
+  - name: "Students flow with data"
+    path: "students/%{facts.polypuppet.student_flow}.conf"
+
+  - name: "Default students data"
+    path: "students/default.conf"
+
+  - name: "Audience with OS data"
+    path: "audience/%{facts.polypuppet.building}/%{facts.polypuppet.audience}/%{os.name}.conf"
 
   - name: "Audience data"
-    path: "audience/${facts.polypuppet.audience}"
+    path: "audience/%{facts.polypuppet.building}/%{facts.polypuppet.audience}.conf"
 
-  - name: "Common data"
-    path: "common.yaml"
+  - name: "Default audience data"
+    path: "audience/default.conf"
+
+  - name: "Default data"
+    path: "default.conf"
