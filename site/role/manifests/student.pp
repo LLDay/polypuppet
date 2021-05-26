@@ -1,5 +1,5 @@
 class role::student {
-  include profile::base
+  include profile::agent
   include profile::vm
   include profile::packages
 }

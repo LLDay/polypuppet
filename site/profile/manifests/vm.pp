@@ -1,8 +1,8 @@
-class profile::vm (
-  Variant[Array[String], Undef] $names = undef,
-) {
+class profile::vm {
 
-  if ! str2bool($::is_virtual) {
+  $names = lookup('virtual_machines', Variant[Array[String], Undef], 'unique', undef)
+
+  if ! str2bool($::is_virtual) and $names != undef {
 
     package { 'vagrant':
       ensure   => installed,
@@ -14,29 +14,29 @@ class profile::vm (
       provider => $::polypuppet::defs::provider,
     }
 
-    $polypuppet_config_dir = $::facts['polypuppet']['confdir']
-    $vagrantfile = "${polypuppet_config_dir}/Vagrantfile"
+    $polypuppet_confdir = $::polypuppet::defs::polypuppet_confdir
+    $vagrantfile = "${polypuppet_confdir}/Vagrantfile"
 
     file { $vagrantfile:
       ensure => present,
       source => 'puppet:///modules/polypuppet/Vagrantfile',
     }
 
-    if $names != undef {
-      $names.each |String $vm| {
+    $names.each |String $vm| {
 
-        exec { "vagrant up ${vm}":
-          cwd  => $polypuppet_config_dir,
-          path => $::path,
-        }
-
-        ~> exec { "vagrant halt ${vm}":
-          cwd         => $polypuppet_config_dir,
-          refreshonly => true,
-          path        => $::path,
-        }
-
+      exec { "vagrant up ${vm}":
+        cwd     => $polypuppet_confdir,
+        path    => $::path,
+        unless  => "polypuppet test vm ${vm}",
+        timeout => 0,
       }
+
+      ~> exec { "vagrant halt ${vm}":
+        cwd         => $polypuppet_confdir,
+        refreshonly => true,
+        path        => $::path,
+      }
+
     }
   }
 }

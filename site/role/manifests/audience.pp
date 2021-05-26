@@ -1,5 +1,5 @@
 class role::audience {
+  include profile::agent
   include profile::packages
-  include profile::base
   include profile::vm
 }
