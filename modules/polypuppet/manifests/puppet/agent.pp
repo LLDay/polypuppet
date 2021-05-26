@@ -29,9 +29,10 @@ class polypuppet::puppet::agent (
   if $allow_puppet {
 
     class { '::puppet':
-      server       => false,
-      runmode      => $runmode,
+      environment  => $polypuppet::environment,
       puppetmaster => $server_domain,
+      runmode      => $runmode,
+      server       => false,
     }
 
   }

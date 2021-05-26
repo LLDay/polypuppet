@@ -10,6 +10,7 @@ class polypuppet::puppet::server(
     class { '::puppet':
       autosign                 => '/usr/local/bin/polypuppet-autosign',
       autosign_mode            => '755',
+      environment              => $polypuppet::environment,
       server                   => true,
       server_ca_allow_sans     => true,
       server_foreman           => true,
@@ -41,6 +42,7 @@ class polypuppet::puppet::server(
     class { '::puppet':
       autosign                 => '/usr/local/bin/polypuppet-autosign',
       autosign_mode            => '755',
+      environment              => $polypuppet::environment,
       report                   => false,
       server                   => true,
       server_ca_allow_sans     => true,
@@ -70,5 +72,13 @@ class polypuppet::puppet::server(
       }
     }
   }
+
+  service { 'polypuppet':
+    ensure    => running,
+    enable    => true,
+    hasstatus => true,
+  }
+
+  Package['polypuppet'] ~> Service['polypuppet']
 
 }

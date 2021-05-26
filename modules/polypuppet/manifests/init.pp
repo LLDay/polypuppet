@@ -1,6 +1,8 @@
 class polypuppet (
   Enum['agent', 'server'] $puppet_role,
 
+  String $environment = undef,
+
   Integer $polypuppet_cert_waittime,
   Integer $polypuppet_control_port,
   Integer $polypuppet_server_port,
