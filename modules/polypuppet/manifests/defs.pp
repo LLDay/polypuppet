@@ -1,6 +1,6 @@
 class polypuppet::defs {
 
-  if $::operatingsystem == 'windows' {
+  if downcase($::os['name']) == 'windows' {
     $provider = 'chocolatey'
     $facter_dir = 'C:\ProgramData\PuppetLabs\facter\etc'
     $facter_path = 'C:\ProgramData\PuppetLabs\facter\etc\facter.conf'

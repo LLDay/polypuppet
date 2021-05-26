@@ -1,6 +1,6 @@
 class polypuppet::install inherits polypuppet::defs {
 
-  if $::operatingsystem == 'windows' {
+  if downcase($::os['name']) == 'windows' {
     include chocolatey
 
     if (versioncmp($::os['release']['major'], '8') < 0) {
