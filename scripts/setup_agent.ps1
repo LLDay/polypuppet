@@ -15,32 +15,6 @@ if (-not($puppet_agent_exists)) {
     choco install -y puppet-agent --no-progress
 }
 
-#if ([System.Environment]::Is64BitOperatingSystem) {
-    #$arch = "x64"
-#} else {
-    #$arch = "x86"
-#}
-
-#$msi_source = "https://downloads.puppetlabs.com/windows/puppet7/puppet-agent-$arch-latest.msi"
-#$msi_file = "puppet-agent.msi"
-
-#if (-not [System.IO.File]::Exists($msi_file)) {
-    #echo "Downloading puppet-agent"
-    #Invoke-WebRequest $msi_source -OutFile $msi_file
-#} else {
-    #echo "Using installed $msi_file"
-#}
-
-#echo "Installing puppet-agent"
-#$result = (Start-Process -FilePath "msiexec.exe" -ArgumentList "/qn /norestart /i $msi_file" -Wait -Passthru).ExitCode
-
-#if ($result -eq 0) {
-    #echo "Puppet-agent installed successfully"
-    ##Remove-Item $msi_file
-#} else {
-    #echo "Puppet-agent doesn't installed due to an error with the code $result"
-#}
-
 echo 'Installing polypuppet module'
 $result = (Start-Process -FilePath "C:\Program Files\Puppet Labs\Puppet\bin\puppet.bat" -ArgumentList "module install llday-polypuppet" -Wait -Passthru).ExitCode
 
