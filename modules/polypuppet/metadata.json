@@ -1,9 +1,9 @@
 {
   "name": "llday-polypuppet",
-  "version": "0.1.6",
+  "version": "0.1.8",
   "author": "llday",
   "summary": "Module for setup polypuppet environment",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "source": "https://github.com/LLDay/polypuppet",
   "project_page": "https://github.com/LLDay/polypuppet",
   "dependencies": [

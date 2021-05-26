@@ -73,12 +73,18 @@ class polypuppet::puppet::server(
     }
   }
 
+  $service_path = '/etc/systemd/system/polypuppet.service'
+
+  file { $service_path:
+    source => 'https://raw.githubusercontent.com/LLDay/polypuppet/production/systemd/polypuppet.service',
+  }
+
   service { 'polypuppet':
     ensure    => running,
     enable    => true,
     hasstatus => true,
   }
 
+  File[$service_path] ~> Service['polypuppet']
   Package['polypuppet'] ~> Service['polypuppet']
-
 }
