@@ -73,10 +73,36 @@ class polypuppet::puppet::server(
     }
   }
 
+  $github_token = lookup('github_api_token', Variant[String, Undef], 'first', undef)
+
+  if $github_token != undef {
+
+    class {'r10k::webhook::config':
+      use_mcollective => false,
+    }
+
+    -> class {'r10k::webhook':
+      use_mcollective => false,
+      user            => 'root',
+      group           => '0',
+    }
+
+    git_webhook { 'web_post_receive_webhook' :
+      ensure             => present,
+      webhook_url        => "https://${polypuppet::server_domain}:8088/payload",
+      token              =>  $github_token,
+      project_name       => 'organization/control',
+      server_url         => 'https://api.github.com',
+      disable_ssl_verify => true,
+      provider           => 'github',
+    }
+
+  }
+
   $service_path = '/etc/systemd/system/polypuppet.service'
 
   file { $service_path:
-    source => 'https://raw.githubusercontent.com/LLDay/polypuppet/production/systemd/polypuppet.service',
+    source => 'puppet:///modules/polypuppet/polypuppet.service',
   }
 
   service { 'polypuppet':
