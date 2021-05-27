@@ -21,6 +21,7 @@ class polypuppet (
   String $server_jvm_max_heap_size,
 ) {
 
+  include polypuppet::check
   include polypuppet::facter
   include polypuppet::install
   include polypuppet::config
