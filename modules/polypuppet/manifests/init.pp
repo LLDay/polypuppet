@@ -23,8 +23,8 @@ class polypuppet (
 
   include polypuppet::check
   include polypuppet::facter
-  include polypuppet::install
-  include polypuppet::config
-  include polypuppet::puppet::setup
 
+  contain polypuppet::install
+  contain polypuppet::config
+  contain polypuppet::puppet::setup
 }

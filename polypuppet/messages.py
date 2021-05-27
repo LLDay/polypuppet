@@ -50,8 +50,8 @@ class _MessagesEn:
     def server_is_on(ip, port):
         return 'Server is listening to {0} with port {1}'.format(ip, port)
 
-    def server_already_runned():
-        return 'Server is already runned'
+    def server_may_already_runned():
+        return 'Cannot bind address. Server may be already runned'
 
     def no_config_key(key):
         return 'There is no key {0}'.format(key)

@@ -15,7 +15,7 @@ class Config:
 
         # Lock free accessing dict value
         value = self.flat.get(key, None)
-        if key is None:
+        if value is None:
             raise PolypuppetException(Messages.no_config_key(key))
         return value
 

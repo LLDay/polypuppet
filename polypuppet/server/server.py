@@ -166,7 +166,7 @@ class Server(LocalConnection, RemoteConnection):
             self.local_server.add_insecure_port(control_address)
             self.remote_server.add_secure_port(server_address, credentials)
         except Exception as exception:
-            exception_message = Messages.server_already_runned()
+            exception_message = Messages.server_may_already_runned()
             raise PolypuppetException(exception_message) from exception
 
         self.local_server.start()
