@@ -8,9 +8,10 @@ server:
 	python3 -m pip install .
 
 agent:
-	python3 -m pip install .
 ifeq "$(OS)" "Windows_NT"
 	./scripts/setup_agent.ps1
+	py -m pip install .
 else
 	./scripts/setup_agent.sh
+	python3 -m pip install .
 endif

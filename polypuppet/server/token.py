@@ -18,7 +18,7 @@ class Token:
             with self.lock:
                 if TOKEN_PATH.exists():
                     with open(TOKEN_PATH, 'r') as tokenfile:
-                        self.token = tokenfile.readline()
+                        self.token = tokenfile.readline().strip()
         except Exception as exception:
             exception_message = Messages.cannot_create_config_file()
             raise PolypuppetException(exception_message) from exception

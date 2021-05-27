@@ -16,6 +16,8 @@ class polypuppet::puppet::agent (
     $allow_puppet = true
   } elsif ! has_key($::facts, 'polypuppet') {
     $allow_puppet = true
+  } elsif $::polypuppet['role'] != 'audience' {
+    $allow_puppet = true
   } elsif $::polypuppet['audience'] == '' or $::polypuppet['building'] == '' {
     $allow_puppet = true
   } elsif $audience == Integer($::polypuppet['audience']) and $building == Integer($::polypuppet['building']) {
@@ -33,6 +35,7 @@ class polypuppet::puppet::agent (
       puppetmaster => $server_domain,
       runmode      => $runmode,
       server       => false,
+      #server_certname => $server_domain,
     }
 
   }

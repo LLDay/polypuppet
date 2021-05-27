@@ -13,25 +13,25 @@ hierarchy:
     path: "nodes/%{trusted.certname}.conf"
 
   - name: "Students group with OS data"
-    path: "${facts.polypuppet.role}/%{facts.polypuppet.student_flow}/%{facts.polypuppet.student_group}/%{os.name}.conf"
+    path: "%{facts.polypuppet.role}/%{facts.polypuppet.student_flow}/%{facts.polypuppet.student_group}/%{os.name}.conf"
 
   - name: "Students group data"
-    path: "${facts.polypuppet.role}/%{facts.polypuppet.student_flow}/%{facts.polypuppet.student_group}.conf"
+    path: "%{facts.polypuppet.role}/%{facts.polypuppet.student_flow}/%{facts.polypuppet.student_group}.conf"
 
   - name: "Students flow with OS data"
-    path: "${facts.polypuppet.role}/%{facts.polypuppet.student_flow}/%{os.name}.conf"
+    path: "%{facts.polypuppet.role}/%{facts.polypuppet.student_flow}/%{os.name}.conf"
 
   - name: "Students flow with data"
-    path: "${facts.polypuppet.role}/%{facts.polypuppet.student_flow}.conf"
+    path: "%{facts.polypuppet.role}/%{facts.polypuppet.student_flow}.conf"
 
   - name: "Audience with OS data"
-    path: "${facts.polypuppet.role}/%{facts.polypuppet.building}/%{facts.polypuppet.audience}/%{os.name}.conf"
+    path: "%{facts.polypuppet.role}/%{facts.polypuppet.building}/%{facts.polypuppet.audience}/%{os.name}.conf"
 
   - name: "Audience data"
-    path: "${facts.polypuppet.role}/%{facts.polypuppet.building}/%{facts.polypuppet.audience}.conf"
+    path: "%{facts.polypuppet.role}/%{facts.polypuppet.building}/%{facts.polypuppet.audience}.conf"
 
   - name: "Default data for role"
-    path: "${facts.polypuppet.role}/default.conf"
+    path: "%{facts.polypuppet.role}/default.conf"
 
   - name: "Default data"
     path: "default.conf"

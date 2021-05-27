@@ -4,10 +4,10 @@ polypuppet::polypuppet_control_port: 8139
 polypuppet::polypuppet_server_port: 8139
 
 polypuppet::enable_foreman: true
-polypuppet::puppet_server_domain: "server.poly.puppet.com"
+polypuppet::puppet_server_domain: "polypuppet.duckdns.org"
 polypuppet::repository: "https://github.com/LLDay/polypuppet"
 
 polypuppet::agent_autostart: false
 
-polypuppet::server_jvm_max_heap_size: "512m"
-polypuppet::server_jvm_min_heap_size: "512m"
+polypuppet::server_jvm_max_heap_size: "1024m"
+polypuppet::server_jvm_min_heap_size: "1024m"
