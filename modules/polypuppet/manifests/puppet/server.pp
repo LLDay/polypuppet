@@ -8,17 +8,18 @@ class polypuppet::puppet::server(
   if $enable_foreman {
 
     class { '::puppet':
-      autosign                 => '/usr/local/bin/polypuppet-autosign',
-      autosign_mode            => '755',
-      codedir                  => $polypuppet::defs::codedir,
-      environment              => $polypuppet::environment,
-      server                   => true,
-      server_ca_allow_sans     => true,
-      server_certname          => $polypuppet::puppet_server_domain,
-      client_certname          => $polypuppet::puppet_server_domain,
-      server_foreman           => true,
-      server_jvm_max_heap_size => $server_jvm_max_heap_size,
-      server_jvm_min_heap_size => $server_jvm_min_heap_size,
+      autosign                   => '/usr/local/bin/polypuppet-autosign',
+      autosign_mode              => '755',
+      client_certname            => $polypuppet::puppet_server_domain,
+      codedir                    => $polypuppet::defs::codedir,
+      environment                => $polypuppet::environment,
+      server                     => true,
+      server_ca_allow_sans       => true,
+      server_certname            => $polypuppet::puppet_server_domain,
+      server_common_modules_path => '',
+      server_foreman             => true,
+      server_jvm_max_heap_size   => $server_jvm_max_heap_size,
+      server_jvm_min_heap_size   => $server_jvm_min_heap_size,
     }
 
     class {'::foreman':
@@ -43,20 +44,21 @@ class polypuppet::puppet::server(
   } else {
 
     class { '::puppet':
-      autosign                 => '/usr/local/bin/polypuppet-autosign',
-      autosign_mode            => '755',
-      codedir                  => $polypuppet::defs::codedir,
-      environment              => $polypuppet::environment,
-      report                   => false,
-      server                   => true,
-      server_ca_allow_sans     => true,
-      server_certname          => $polypuppet::puppet_server_domain,
-      client_certname          => $polypuppet::puppet_server_domain,
-      server_external_nodes    => '',
-      server_foreman           => false,
-      server_jvm_max_heap_size => $server_jvm_max_heap_size,
-      server_jvm_min_heap_size => $server_jvm_min_heap_size,
-      server_reports           => '',
+      autosign                   => '/usr/local/bin/polypuppet-autosign',
+      autosign_mode              => '755',
+      client_certname            => $polypuppet::puppet_server_domain,
+      codedir                    => $polypuppet::defs::codedir,
+      environment                => $polypuppet::environment,
+      report                     => false,
+      server                     => true,
+      server_ca_allow_sans       => true,
+      server_certname            => $polypuppet::puppet_server_domain,
+      server_common_modules_path => '',
+      server_external_nodes      => '',
+      server_foreman             => false,
+      server_jvm_max_heap_size   => $server_jvm_max_heap_size,
+      server_jvm_min_heap_size   => $server_jvm_min_heap_size,
+      server_reports             => '',
     }
 
   }
@@ -103,6 +105,18 @@ class polypuppet::puppet::server(
       provider           => 'github',
     }
 
+  }
+
+  package { 'hiera-eyaml':
+    ensure   => installed,
+    provider => gem,
+  }
+
+  exec { 'eyaml createkeys':
+    command => 'eyaml createkeys --pkcs7-private-key=/etc/puppetlabs/puppet/keys/private_key.pkcs7.pem\
+                                 --pkcs7-public-key=/etc/puppetlabs/puppet/keys/public_key.pkcs7.pem',
+    creates => '/etc/puppetlabs/puppet/keys/private_key.pkcs7.pem',
+    path    => $::path,
   }
 
   $service_path = '/etc/systemd/system/polypuppet.service'

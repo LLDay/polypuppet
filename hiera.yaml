@@ -3,35 +3,28 @@ version: 5
 
 defaults:
   datadir: data
-  data_hash: hocon_data
 
 hierarchy:
-  - name: "Specific node with OS data"
-    path: "nodes/%{trusted.certname}/%{os.name}.conf"
+  - name: "Secret data in yaml"
+    lookup_key: eyaml_lookup_key
+    paths:
+      - "secret/nodes/%{trusted.certname}.eyaml"
+      - "secret/%{facts.polypuppet.role}/%{facts.polypuppet.building}/%{facts.polypuppet.audience}.eyaml"
+      - "secret/common.eyaml"
+    options:
+        pkcs7_private_key: /etc/puppetlabs/puppet/keys/private_key.pkcs7.pem
+        pkcs7_public_key:  /etc/puppetlabs/puppet/keys/public_key.pkcs7.pem
 
-  - name: "Specific node data"
-    path: "nodes/%{trusted.certname}.conf"
-
-  - name: "Students group with OS data"
-    path: "%{facts.polypuppet.role}/%{facts.polypuppet.student_flow}/%{facts.polypuppet.student_group}/%{os.name}.conf"
-
-  - name: "Students group data"
-    path: "%{facts.polypuppet.role}/%{facts.polypuppet.student_flow}/%{facts.polypuppet.student_group}.conf"
-
-  - name: "Students flow with OS data"
-    path: "%{facts.polypuppet.role}/%{facts.polypuppet.student_flow}/%{os.name}.conf"
-
-  - name: "Students flow with data"
-    path: "%{facts.polypuppet.role}/%{facts.polypuppet.student_flow}.conf"
-
-  - name: "Audience with OS data"
-    path: "%{facts.polypuppet.role}/%{facts.polypuppet.building}/%{facts.polypuppet.audience}/%{os.name}.conf"
-
-  - name: "Audience data"
-    path: "%{facts.polypuppet.role}/%{facts.polypuppet.building}/%{facts.polypuppet.audience}.conf"
-
-  - name: "Default data for role"
-    path: "%{facts.polypuppet.role}/default.conf"
-
-  - name: "Default data"
-    path: "default.conf"
+  - name: "Normal data in hocon"
+    data_hash: hocon_data
+    paths:
+      - "nodes/%{trusted.certname}/%{os.name}.conf"
+      - "nodes/%{trusted.certname}.conf"
+      - "%{facts.polypuppet.role}/%{facts.polypuppet.student_flow}/%{facts.polypuppet.student_group}/%{os.name}.conf"
+      - "%{facts.polypuppet.role}/%{facts.polypuppet.student_flow}/%{facts.polypuppet.student_group}.conf"
+      - "%{facts.polypuppet.role}/%{facts.polypuppet.student_flow}/%{os.name}.conf"
+      - "%{facts.polypuppet.role}/%{facts.polypuppet.student_flow}.conf"
+      - "%{facts.polypuppet.role}/%{facts.polypuppet.building}/%{facts.polypuppet.audience}/%{os.name}.conf"
+      - "%{facts.polypuppet.role}/%{facts.polypuppet.building}/%{facts.polypuppet.audience}.conf"
+      - "%{facts.polypuppet.role}/default.conf"
+      - "default.conf"

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "polypuppet"
-version = "0.1.3"
+version = "0.1.4"
 description = "Administration tool for SPBSTU"
 authors = ["LLDay <ssdenis99@gmail.com>"]
 license = "MIT"
