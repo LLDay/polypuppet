@@ -155,7 +155,8 @@ def test_config(key, value):
 @click.argument('vm_name')
 def vm(vm_name):
     vagrant = Vagrant()
-    vagrant.is_created(vm_name)
+    if not vagrant.is_created(vm_name):
+        exit(1)
 
 
 @cli.command()
