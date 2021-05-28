@@ -35,7 +35,7 @@ class polypuppet::puppet::agent (
       puppetmaster => $server_domain,
       runmode      => $runmode,
       server       => false,
-      #server_certname => $server_domain,
+      codedir      => $polypuppet::defs::codedir,
     }
 
   }

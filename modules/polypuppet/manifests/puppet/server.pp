@@ -10,6 +10,7 @@ class polypuppet::puppet::server(
     class { '::puppet':
       autosign                 => '/usr/local/bin/polypuppet-autosign',
       autosign_mode            => '755',
+      codedir                  => $polypuppet::defs::codedir,
       environment              => $polypuppet::environment,
       server                   => true,
       server_ca_allow_sans     => true,
@@ -44,6 +45,7 @@ class polypuppet::puppet::server(
     class { '::puppet':
       autosign                 => '/usr/local/bin/polypuppet-autosign',
       autosign_mode            => '755',
+      codedir                  => $polypuppet::defs::codedir,
       environment              => $polypuppet::environment,
       report                   => false,
       server                   => true,

@@ -39,11 +39,11 @@ class polypuppet::install inherits polypuppet::defs {
       provider => $polypuppet::defs::provider,
     }
 
-    -> package { 'polypuppet':
-      ensure   => installed,
-      provider => pip3,
-    }
+  }
 
+  package { 'polypuppet':
+    ensure   => installed,
+    provider => pip3,
   }
 
 }

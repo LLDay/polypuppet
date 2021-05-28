@@ -6,6 +6,7 @@ if (-not($choco_exists)) {
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
     iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
     Set-ExecutionPolicy Default -Scope Process -Force
+    refreshenv | Out-Null
 }
 
 $puppet_agent_exists = choco list -lo | Where-object { $_.ToLower().StartsWith("puppet-agent") }
@@ -13,6 +14,7 @@ $puppet_agent_exists = choco list -lo | Where-object { $_.ToLower().StartsWith("
 if (-not($puppet_agent_exists)) {
     echo 'Installing puppet-agent'
     choco install -y puppet-agent --no-progress
+    refreshenv | Out-Null
 }
 
 echo 'Installing polypuppet module'
