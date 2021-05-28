@@ -16,17 +16,16 @@ if (-not($puppet_agent_exists)) {
 }
 
 echo 'Installing polypuppet module'
-$result = (Start-Process -FilePath "C:\Program Files\Puppet Labs\Puppet\bin\puppet.bat" -ArgumentList "module install llday-polypuppet" -Wait -Passthru).ExitCode
-
-if ($result -ne 0) {
+try {
+    iex 'C:\Program` Files\Puppet` Labs\Puppet\bin\puppet.bat module install llday-polypuppet'
+} catch {
     echo "Some errors occure during module installation"
 }
 
 echo 'Configuring puppet'
-$result = (Start-Process -FilePath "C:\Program Files\Puppet Labs\Puppet\bin\puppet.bat" -ArgumentList "apply -e 'class { `"polypuppet`": puppet_role => `"agent`", '}" -Wait -Passthru).ExitCode
-
-if ($result -eq 0) {
+try {
+    iex 'C:\Program` Files\Puppet` Labs\Puppet\bin\puppet.bat apply -e "class { `"polypuppet`": puppet_role => `"agent`", }"'
     echo 'Puppet-agent is configured'
-} else {
+} catch {
     echo 'Some errors happen during configuration'
 }
