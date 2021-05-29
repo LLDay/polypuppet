@@ -155,13 +155,17 @@ class Server(LocalConnection, RemoteConnection):
         control_port = self.config['CONTROL_PORT']
         control_address = control_ip + ':' + control_port
 
-        ssl_cert = Path(self.config['SSL_CERT'])
-        with open(ssl_cert, 'rb') as cert:
-            ssl_cert = cert.read()
+        try:
+            ssl_cert = Path(self.config['SSL_CERT'])
+            with open(ssl_cert, 'rb') as cert:
+                ssl_cert = cert.read()
 
-        ssl_private = Path(self.config['SSL_PRIVATE'])
-        with open(ssl_private, 'rb') as private:
-            ssl_private = private.read()
+            ssl_private = Path(self.config['SSL_PRIVATE'])
+            with open(ssl_private, 'rb') as private:
+                ssl_private = private.read()
+        except PermissionError as error:
+            error_message = Messages.cannot_read_ssl()
+            raise PolypuppetException(error_message) from error
 
         credentials = grpc.ssl_server_credentials([(ssl_private, ssl_cert)])
 

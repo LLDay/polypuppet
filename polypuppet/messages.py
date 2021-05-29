@@ -74,6 +74,9 @@ class _MessagesEn:
     def cannot_create_ca_file():
         return 'Cannot create ca.pem file because of low permissions'
 
+    def cannot_read_ssl():
+        return 'Cannot read ssl files because of low permissions'
+
     def cannot_connect_to_cas():
         return 'Cannot connect to the CAS'
 

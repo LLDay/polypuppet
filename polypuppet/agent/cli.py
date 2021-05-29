@@ -12,25 +12,33 @@ from polypuppet.agent.vagrant import Vagrant
 from polypuppet.exception import PolypuppetException
 from polypuppet.messages import Messages
 
+_GRPC_V = 'GRPC_VERBOSITY'
+
+
+def verbosity_option(f):
+    def callback(ctx, param, value):
+        if value > 0:
+            root = logging.root
+            root.setLevel(logging.DEBUG)
+        if value > 1:
+            os.environ[_GRPC_V] = 'DEBUG'
+        return value
+
+    return click.option('-v', '--verbose', count=True,
+                        expose_value=False,
+                        help='Enables verbosity.',
+                        callback=callback)(f)
+
 
 @click.group()
-@click.option('-v', '--verbose', count=True, help=Messages.help_verbose())
-def cli(verbose):
-    grpc_v = 'GRPC_VERBOSITY'
-    os.environ[grpc_v] = 'NONE'
-
-    log_level = logging.INFO
-    if verbose > 0:
-        log_level = logging.DEBUG
-    if verbose > 1:
-        os.environ[grpc_v] = 'DEBUG'
-
-    log_format = '%(message)s'
-    logging.basicConfig(format=log_format, level=log_level)
+@verbosity_option
+def cli():
+    pass
 
 
 @cli.command()
 @click.argument('certname')
+@verbosity_option
 def autosign(certname):
     agent = Agent()
     has_certname = agent.autosign(certname)
@@ -39,6 +47,7 @@ def autosign(certname):
 
 
 @cli.group('login')
+@verbosity_option
 def login_group():
     pass
 
@@ -54,6 +63,7 @@ def check_login(response):
 @login_group.command()
 @click.argument('username', required=False)
 @click.argument('password', required=False)
+@verbosity_option
 def user(username, password):
     agent = Agent()
     if username is None:
@@ -68,6 +78,7 @@ def user(username, password):
 @click.argument('building', required=True, type=click.INT)
 @click.argument('number', required=True, type=click.INT)
 @click.argument('token', required=True, type=click.STRING)
+@verbosity_option
 def audience(building, number, token):
     agent = Agent()
     response = agent.audience(building, number, token)
@@ -93,12 +104,14 @@ def start_server():
 
 @cli.group(name='server', invoke_without_command=True, help=Messages.help_server())
 @click.pass_context
+@verbosity_option
 def group_server(ctx):
     if not ctx.invoked_subcommand:
         start_server()
 
 
 @group_server.command(name='stop', help=Messages.help_server_stop())
+@verbosity_option
 def server_stop():
     agent = Agent()
     if agent.stop_server():
@@ -106,6 +119,7 @@ def server_stop():
 
 
 @group_server.command(name='daemon', help=Messages.help_server_daemon())
+@verbosity_option
 def server_daemon():
     process = mp.Process(target=start_server)
     process.start()
@@ -115,6 +129,7 @@ def server_daemon():
 @cli.command(name='config')
 @click.argument('key', required=False)
 @click.argument('value', required=False)
+@verbosity_option
 def manage_config(key, value):
     config = Config()
     if key is None:
@@ -127,6 +142,7 @@ def manage_config(key, value):
 
 
 @cli.group(name='test')
+@verbosity_option
 def test_group():
     pass
 
@@ -134,6 +150,7 @@ def test_group():
 @test_group.command(name='audience')
 @click.argument('building')
 @click.argument('audience')
+@verbosity_option
 def test_audience(building, audience):
     config = Config()
     if config['AUDIENCE'] != audience or config['BUILDING'] != building:
@@ -143,6 +160,7 @@ def test_audience(building, audience):
 @test_group.command(name='config')
 @click.argument('key')
 @click.argument('value')
+@verbosity_option
 def test_config(key, value):
     config = Config()
     try:
@@ -154,6 +172,7 @@ def test_config(key, value):
 
 @test_group.command()
 @click.argument('vm_name')
+@verbosity_option
 def vm(vm_name):
     vagrant = Vagrant()
     if not vagrant.is_created(vm_name):
@@ -162,6 +181,7 @@ def vm(vm_name):
 
 @cli.group(name='token', invoke_without_command=True)
 @click.pass_context
+@verbosity_option
 def token_group(ctx):
     if not ctx.invoked_subcommand:
         agent = Agent()
@@ -174,6 +194,7 @@ def token_group(ctx):
 
 
 @token_group.command(name='new')
+@verbosity_option
 def token_new():
     agent = Agent()
     server_token = agent.update_token()
@@ -181,6 +202,7 @@ def token_new():
 
 
 @token_group.command(name='clear')
+@verbosity_option
 def token_clear():
     agent = Agent()
     agent.clear_token()
@@ -188,12 +210,18 @@ def token_clear():
 
 @token_group.command(name='set')
 @click.argument('token')
+@verbosity_option
 def token_set(token):
     agent = Agent()
     agent.set_token(token)
 
 
 def main():
+    os.environ[_GRPC_V] = 'NONE'
+    log_level = logging.INFO
+    log_format = '%(message)s'
+    logging.basicConfig(format=log_format, level=log_level)
+
     try:
         cli()
     except PolypuppetException as pe:
