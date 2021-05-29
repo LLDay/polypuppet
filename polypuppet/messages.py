@@ -32,9 +32,6 @@ class _MessagesEn:
     def help_server_restart():
         return 'Restart the server if it has been ran'
 
-    def help_server_clean():
-        return "Clean server's certificate"
-
     def help_server_stop():
         return 'Stop the server'
 

@@ -78,6 +78,8 @@ def start_server():
     try:
         # This prevents error messages on operating systems that are not supported for the server
         from polypuppet.server.server import main as server_main
+        agent = Agent()
+        agent.stop_server()
         server_main()
 
     except ModuleNotFoundError:
@@ -89,26 +91,25 @@ def start_server():
         sys.exit(1)
 
 
-@cli.command(help=Messages.help_server())
-@click.option('-d', '--daemon', is_flag=True, help=Messages.help_server_daemon())
-@click.option('-r', '--restart', is_flag=True, help=Messages.help_server_restart())
-@click.option('-s', '--stop', is_flag=True, help=Messages.help_server_stop())
-def server(daemon, restart, stop):
-    if stop or restart:
-        agent = Agent()
-        is_stopped = agent.stop_server()
-
-    if stop:
-        if is_stopped:
-            out.info(Messages.server_stopped())
-        return
-
-    if daemon:
-        process = mp.Process(target=start_server)
-        process.start()
-        os._exit(0)
-    else:
+@cli.group(name='server', invoke_without_command=True, help=Messages.help_server())
+@click.pass_context
+def group_server(ctx):
+    if not ctx.invoked_subcommand:
         start_server()
+
+
+@group_server.command(name='stop', help=Messages.help_server_stop())
+def server_stop():
+    agent = Agent()
+    if agent.stop_server():
+        out.info(Messages.server_stopped())
+
+
+@group_server.command(name='daemon', help=Messages.help_server_daemon())
+def server_daemon():
+    process = mp.Process(target=start_server)
+    process.start()
+    os._exit(0)
 
 
 @cli.command(name='config')
