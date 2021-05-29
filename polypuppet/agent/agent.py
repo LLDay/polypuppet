@@ -61,15 +61,19 @@ class Agent:
 
         return RemoteConnectionStub(channel)
 
-    def _token_action(self, action):
+    def _token_action(self, action, token=str()):
         message = proto.Token()
         message.taction = action
+        message.token = token
         local_stub = self.get_local_stub()
         response = local_stub.manage_token(message)
         return response.token
 
     def get_token(self):
         return self._token_action(proto.GET)
+
+    def set_token(self, token):
+        return self._token_action(proto.SET, token)
 
     def clear_token(self):
         return self._token_action(proto.CLEAR)

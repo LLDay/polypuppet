@@ -47,7 +47,8 @@ message Autosign {
 enum TokenAction {
     GET   = 0;
     NEW   = 1;
-    CLEAR = 2;
+    SET   = 2;
+    CLEAR = 3;
 }
 
 message Token {

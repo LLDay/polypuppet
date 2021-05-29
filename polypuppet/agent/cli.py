@@ -159,25 +159,37 @@ def vm(vm_name):
         exit(1)
 
 
-@cli.command()
-@click.option('--new', '-n', is_flag=True)
-@click.option('--clear', '-c', is_flag=True)
-def token(new, clear):
-    agent = Agent()
-    if clear:
-        agent.clear_token()
-        return
-
-    if new:
-        server_token = agent.update_token()
-        out.info(server_token)
-    else:
+@cli.group(name='token', invoke_without_command=True)
+@click.pass_context
+def token_group(ctx):
+    if not ctx.invoked_subcommand:
+        agent = Agent()
         server_token = agent.get_token()
         if server_token != str():
             out.info(server_token)
         else:
             out.warning(Messages.token_not_generated())
             sys.exit(1)
+
+
+@token_group.command(name='new')
+def token_new():
+    agent = Agent()
+    server_token = agent.update_token()
+    out.info(server_token)
+
+
+@token_group.command(name='clear')
+def token_clear():
+    agent = Agent()
+    agent.clear_token()
+
+
+@token_group.command(name='set')
+@click.argument('token')
+def token_set(token):
+    agent = Agent()
+    agent.set_token(token)
 
 
 def main():

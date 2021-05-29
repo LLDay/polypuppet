@@ -99,6 +99,9 @@ class Server(LocalConnection, RemoteConnection):
             response.token = self.token.get()
         elif taction == proto.NEW:
             response.token = self.token.new()
+        elif taction == proto.SET:
+            self.token.set(request.token)
+            response.token = self.token.get()
         elif taction == proto.CLEAR:
             self.token.clear()
         return response

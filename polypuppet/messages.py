@@ -106,7 +106,7 @@ class _MessagesEn:
         return 'Cannot request token. No server runs on local machine'
 
     def token_not_generated():
-        return "Token has not been generated. Call 'polypuppet token --new' first"
+        return "Token has not been generated. Call 'polypuppet token new' or 'polypuppet token set' first"
 
     def cannot_generate_certificate():
         return 'Server cannot generate certificate'
