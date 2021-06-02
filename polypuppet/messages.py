@@ -20,8 +20,8 @@ class _MessagesEn:
     def help_token():
         return "Secret server's token"
 
-    def help_audience_number():
-        return 'Audience number'
+    def help_classroom_number():
+        return 'Classroom number'
 
     def help_server():
         return 'Manages the server'

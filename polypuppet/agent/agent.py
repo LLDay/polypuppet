@@ -100,8 +100,8 @@ class Agent:
         ssl_private = ssldir / ('private_keys/' + certname + '.pem')
 
         self.config['AGENT_CERTNAME'] = certname
-        self.config['AUDIENCE'] = str(response.audience)
         self.config['BUILDING'] = str(response.building)
+        self.config['CLASSROOM'] = str(response.classroom)
         self.config['ROLE'] = proto.Role.Name(response.role).lower()
         self.config['SSL_CERT'] = ssl_cert.as_posix()
         self.config['SSL_PRIVATE'] = ssl_private.as_posix()
@@ -111,11 +111,11 @@ class Agent:
         self.puppet.certname(response.certname)
         return self.puppet.sync(noop=True)
 
-    def audience(self, building, number, token):
-        message = proto.Audience()
+    def classroom(self, building, number, token):
+        message = proto.Classroom()
         message.token = token
         message.building = building
-        message.audience = number
+        message.classroom = number
 
         pc = Pc()
         message.pc.uuid = pc.uuid
@@ -123,7 +123,7 @@ class Agent:
         message.pc.release = pc.release
 
         remote_stub = self.get_remote_stub()
-        response = remote_stub.login_audience(message)
+        response = remote_stub.login_classroom(message)
         if response.ok:
             self.on_login(response)
         return response.ok

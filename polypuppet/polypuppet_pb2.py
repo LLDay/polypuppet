@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x10polypuppet.proto\x1a\x1bgoogle/protobuf/empty.proto\"5\n\x02PC\x12\x0c\n\x04uuid\x18\x01 \x01(\x04\x12\x10\n\x08platform\x18\x02 \x01(\t\x12\x0f\n\x07release\x18\x03 \x01(\t\"*\n\x04User\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"N\n\x08\x41udience\x12\x0f\n\x02pc\x18\x01 \x01(\x0b\x32\x03.PC\x12\x10\n\x08\x62uilding\x18\x02 \x01(\r\x12\x10\n\x08\x61udience\x18\x03 \x01(\r\x12\r\n\x05token\x18\x04 \x01(\t\"}\n\x07Profile\x12\x13\n\x04role\x18\x01 \x01(\x0e\x32\x05.Role\x12\x10\n\x08\x63\x65rtname\x18\x02 \x01(\t\x12\x0c\n\x04\x66low\x18\x03 \x01(\t\x12\r\n\x05group\x18\x04 \x01(\t\x12\x10\n\x08\x62uilding\x18\x05 \x01(\r\x12\x10\n\x08\x61udience\x18\x06 \x01(\r\x12\n\n\x02ok\x18\x07 \x01(\x08\"\x1c\n\x08\x43\x65rtname\x12\x10\n\x08\x63\x65rtname\x18\x01 \x01(\t\"\x16\n\x08\x41utosign\x12\n\n\x02ok\x18\x01 \x01(\x08\"5\n\x05Token\x12\x1d\n\x07taction\x18\x01 \x01(\x0e\x32\x0c.TokenAction\x12\r\n\x05token\x18\x02 \x01(\t*,\n\x04Role\x12\x0c\n\x08\x41UDIENCE\x10\x00\x12\x0b\n\x07STUDENT\x10\x01\x12\t\n\x05OTHER\x10\x02*3\n\x0bTokenAction\x12\x07\n\x03GET\x10\x00\x12\x07\n\x03NEW\x10\x01\x12\x07\n\x03SET\x10\x02\x12\t\n\x05\x43LEAR\x10\x03\x32\\\n\x10RemoteConnection\x12\x1f\n\nlogin_user\x12\x05.User\x1a\x08.Profile\"\x00\x12\'\n\x0elogin_audience\x12\t.Audience\x1a\x08.Profile\"\x00\x32\x91\x01\n\x0fLocalConnection\x12 \n\x0cmanage_token\x12\x06.Token\x1a\x06.Token\"\x00\x12\"\n\x08\x61utosign\x12\t.Certname\x1a\t.Autosign\"\x00\x12\x38\n\x04stop\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x10polypuppet.proto\x1a\x1bgoogle/protobuf/empty.proto\"5\n\x02PC\x12\x0c\n\x04uuid\x18\x01 \x01(\x04\x12\x10\n\x08platform\x18\x02 \x01(\t\x12\x0f\n\x07release\x18\x03 \x01(\t\"*\n\x04User\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"P\n\tClassroom\x12\x0f\n\x02pc\x18\x01 \x01(\x0b\x32\x03.PC\x12\x10\n\x08\x62uilding\x18\x02 \x01(\r\x12\x11\n\tclassroom\x18\x03 \x01(\r\x12\r\n\x05token\x18\x04 \x01(\t\"~\n\x07Profile\x12\x13\n\x04role\x18\x01 \x01(\x0e\x32\x05.Role\x12\x10\n\x08\x63\x65rtname\x18\x02 \x01(\t\x12\x0c\n\x04\x66low\x18\x03 \x01(\t\x12\r\n\x05group\x18\x04 \x01(\t\x12\x10\n\x08\x62uilding\x18\x05 \x01(\r\x12\x11\n\tclassroom\x18\x06 \x01(\r\x12\n\n\x02ok\x18\x07 \x01(\x08\"\x1c\n\x08\x43\x65rtname\x12\x10\n\x08\x63\x65rtname\x18\x01 \x01(\t\"\x16\n\x08\x41utosign\x12\n\n\x02ok\x18\x01 \x01(\x08\"5\n\x05Token\x12\x1d\n\x07taction\x18\x01 \x01(\x0e\x32\x0c.TokenAction\x12\r\n\x05token\x18\x02 \x01(\t*-\n\x04Role\x12\r\n\tCLASSROOM\x10\x00\x12\x0b\n\x07STUDENT\x10\x01\x12\t\n\x05OTHER\x10\x02*3\n\x0bTokenAction\x12\x07\n\x03GET\x10\x00\x12\x07\n\x03NEW\x10\x01\x12\x07\n\x03SET\x10\x02\x12\t\n\x05\x43LEAR\x10\x03\x32^\n\x10RemoteConnection\x12\x1f\n\nlogin_user\x12\x05.User\x1a\x08.Profile\"\x00\x12)\n\x0flogin_classroom\x12\n.Classroom\x1a\x08.Profile\"\x00\x32\x91\x01\n\x0fLocalConnection\x12 \n\x0cmanage_token\x12\x06.Token\x1a\x06.Token\"\x00\x12\"\n\x08\x61utosign\x12\t.Certname\x1a\t.Autosign\"\x00\x12\x38\n\x04stop\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\"\x00\x62\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,])
 
@@ -33,7 +33,7 @@ _ROLE = _descriptor.EnumDescriptor(
   create_key=_descriptor._internal_create_key,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='AUDIENCE', index=0, number=0,
+      name='CLASSROOM', index=0, number=0,
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
@@ -50,8 +50,8 @@ _ROLE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=464,
-  serialized_end=508,
+  serialized_start=467,
+  serialized_end=512,
 )
 _sym_db.RegisterEnumDescriptor(_ROLE)
 
@@ -86,13 +86,13 @@ _TOKENACTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=510,
-  serialized_end=561,
+  serialized_start=514,
+  serialized_end=565,
 )
 _sym_db.RegisterEnumDescriptor(_TOKENACTION)
 
 TokenAction = enum_type_wrapper.EnumTypeWrapper(_TOKENACTION)
-AUDIENCE = 0
+CLASSROOM = 0
 STUDENT = 1
 OTHER = 2
 GET = 0
@@ -187,37 +187,37 @@ _USER = _descriptor.Descriptor(
 )
 
 
-_AUDIENCE = _descriptor.Descriptor(
-  name='Audience',
-  full_name='Audience',
+_CLASSROOM = _descriptor.Descriptor(
+  name='Classroom',
+  full_name='Classroom',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='pc', full_name='Audience.pc', index=0,
+      name='pc', full_name='Classroom.pc', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='building', full_name='Audience.building', index=1,
+      name='building', full_name='Classroom.building', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='audience', full_name='Audience.audience', index=2,
+      name='classroom', full_name='Classroom.classroom', index=2,
       number=3, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='token', full_name='Audience.token', index=3,
+      name='token', full_name='Classroom.token', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -236,7 +236,7 @@ _AUDIENCE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=148,
-  serialized_end=226,
+  serialized_end=228,
 )
 
 
@@ -284,7 +284,7 @@ _PROFILE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='audience', full_name='Profile.audience', index=5,
+      name='classroom', full_name='Profile.classroom', index=5,
       number=6, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -309,8 +309,8 @@ _PROFILE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=228,
-  serialized_end=353,
+  serialized_start=230,
+  serialized_end=356,
 )
 
 
@@ -341,8 +341,8 @@ _CERTNAME = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=355,
-  serialized_end=383,
+  serialized_start=358,
+  serialized_end=386,
 )
 
 
@@ -373,8 +373,8 @@ _AUTOSIGN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=385,
-  serialized_end=407,
+  serialized_start=388,
+  serialized_end=410,
 )
 
 
@@ -412,16 +412,16 @@ _TOKEN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=409,
-  serialized_end=462,
+  serialized_start=412,
+  serialized_end=465,
 )
 
-_AUDIENCE.fields_by_name['pc'].message_type = _PC
+_CLASSROOM.fields_by_name['pc'].message_type = _PC
 _PROFILE.fields_by_name['role'].enum_type = _ROLE
 _TOKEN.fields_by_name['taction'].enum_type = _TOKENACTION
 DESCRIPTOR.message_types_by_name['PC'] = _PC
 DESCRIPTOR.message_types_by_name['User'] = _USER
-DESCRIPTOR.message_types_by_name['Audience'] = _AUDIENCE
+DESCRIPTOR.message_types_by_name['Classroom'] = _CLASSROOM
 DESCRIPTOR.message_types_by_name['Profile'] = _PROFILE
 DESCRIPTOR.message_types_by_name['Certname'] = _CERTNAME
 DESCRIPTOR.message_types_by_name['Autosign'] = _AUTOSIGN
@@ -444,12 +444,12 @@ User = _reflection.GeneratedProtocolMessageType('User', (_message.Message,), {
   })
 _sym_db.RegisterMessage(User)
 
-Audience = _reflection.GeneratedProtocolMessageType('Audience', (_message.Message,), {
-  'DESCRIPTOR' : _AUDIENCE,
+Classroom = _reflection.GeneratedProtocolMessageType('Classroom', (_message.Message,), {
+  'DESCRIPTOR' : _CLASSROOM,
   '__module__' : 'polypuppet_pb2'
-  # @@protoc_insertion_point(class_scope:Audience)
+  # @@protoc_insertion_point(class_scope:Classroom)
   })
-_sym_db.RegisterMessage(Audience)
+_sym_db.RegisterMessage(Classroom)
 
 Profile = _reflection.GeneratedProtocolMessageType('Profile', (_message.Message,), {
   'DESCRIPTOR' : _PROFILE,
@@ -488,8 +488,8 @@ _REMOTECONNECTION = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=563,
-  serialized_end=655,
+  serialized_start=567,
+  serialized_end=661,
   methods=[
   _descriptor.MethodDescriptor(
     name='login_user',
@@ -502,11 +502,11 @@ _REMOTECONNECTION = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
-    name='login_audience',
-    full_name='RemoteConnection.login_audience',
+    name='login_classroom',
+    full_name='RemoteConnection.login_classroom',
     index=1,
     containing_service=None,
-    input_type=_AUDIENCE,
+    input_type=_CLASSROOM,
     output_type=_PROFILE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
@@ -524,8 +524,8 @@ _LOCALCONNECTION = _descriptor.ServiceDescriptor(
   index=1,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=658,
-  serialized_end=803,
+  serialized_start=664,
+  serialized_end=809,
   methods=[
   _descriptor.MethodDescriptor(
     name='manage_token',

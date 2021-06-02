@@ -62,8 +62,8 @@ class Config:
             'CONTROL_PORT': 8139,
             'CERT_WAITTIME': 90}
         default_config['profile'] = {
-            'AUDIENCE': '',
             'BUILDING': '',
+            'CLASSROOM': '',
             'ROLE': '',
             'STUDENT_FLOW': '',
             'STUDENT_GROUP': ''}

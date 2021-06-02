@@ -17,7 +17,7 @@ from polypuppet.polypuppet_pb2_grpc import add_LocalConnectionServicer_to_server
 from polypuppet.polypuppet_pb2_grpc import add_RemoteConnectionServicer_to_server
 from polypuppet.polypuppet_pb2_grpc import LocalConnection
 from polypuppet.polypuppet_pb2_grpc import RemoteConnection
-from polypuppet.server.audience import Audience
+from polypuppet.server.classroom import Classroom
 from polypuppet.server.authentication import authenticate
 from polypuppet.server.cert_list import CertList
 from polypuppet.server.person import PersonType
@@ -67,18 +67,18 @@ class Server(LocalConnection, RemoteConnection):
             self.wait_for_certificate(certname)
         return profile
 
-    def login_audience(self, credentials, context):
+    def login_classroom(self, credentials, context):
         profile = proto.Profile()
         token = self.token
         if not token.empty() and credentials.token == token:
-            audience = Audience()
-            audience.deserialize(credentials)
+            classroom = Classroom()
+            classroom.deserialize(credentials)
 
-            certname = audience.certname()
+            certname = classroom.certname()
             profile.ok = True
-            profile.role = proto.AUDIENCE
+            profile.role = proto.CLASSROOM
             profile.certname = certname
-            profile.audience = credentials.audience
+            profile.classroom = credentials.classroom
             profile.building = credentials.building
             self.wait_for_certificate(certname)
         return profile

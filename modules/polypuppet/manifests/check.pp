@@ -14,8 +14,8 @@ class polypuppet::check {
       }
     }
 
-    if $certname =~ /^audience\..*/ {
-      if $role != 'audience' {
+    if $certname =~ /^classroom\..*/ {
+      if $role != 'classroom' {
         fail("Role is changed explicitly. You should again with 'polypuppet login'")
       }
     }

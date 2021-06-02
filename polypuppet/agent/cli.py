@@ -79,9 +79,9 @@ def user(username, password):
 @click.argument('number', required=True, type=click.INT)
 @click.argument('token', required=True, type=click.STRING)
 @verbosity_option
-def audience(building, number, token):
+def classroom(building, number, token):
     agent = Agent()
-    response = agent.audience(building, number, token)
+    response = agent.classroom(building, number, token)
     check_login(response)
 
 
@@ -147,13 +147,13 @@ def test_group():
     pass
 
 
-@test_group.command(name='audience')
+@test_group.command(name='classroom')
 @click.argument('building')
-@click.argument('audience')
+@click.argument('classroom')
 @verbosity_option
-def test_audience(building, audience):
+def test_classroom(building, classroom):
     config = Config()
-    if config['AUDIENCE'] != audience or config['BUILDING'] != building:
+    if config['CLASSROOM'] != classroom or config['BUILDING'] != building:
         sys.exit(1)
 
 

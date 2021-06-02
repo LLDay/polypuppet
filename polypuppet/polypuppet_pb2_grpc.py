@@ -20,9 +20,9 @@ class RemoteConnectionStub(object):
                 request_serializer=polypuppet__pb2.User.SerializeToString,
                 response_deserializer=polypuppet__pb2.Profile.FromString,
                 )
-        self.login_audience = channel.unary_unary(
-                '/RemoteConnection/login_audience',
-                request_serializer=polypuppet__pb2.Audience.SerializeToString,
+        self.login_classroom = channel.unary_unary(
+                '/RemoteConnection/login_classroom',
+                request_serializer=polypuppet__pb2.Classroom.SerializeToString,
                 response_deserializer=polypuppet__pb2.Profile.FromString,
                 )
 
@@ -36,7 +36,7 @@ class RemoteConnectionServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def login_audience(self, request, context):
+    def login_classroom(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -50,9 +50,9 @@ def add_RemoteConnectionServicer_to_server(servicer, server):
                     request_deserializer=polypuppet__pb2.User.FromString,
                     response_serializer=polypuppet__pb2.Profile.SerializeToString,
             ),
-            'login_audience': grpc.unary_unary_rpc_method_handler(
-                    servicer.login_audience,
-                    request_deserializer=polypuppet__pb2.Audience.FromString,
+            'login_classroom': grpc.unary_unary_rpc_method_handler(
+                    servicer.login_classroom,
+                    request_deserializer=polypuppet__pb2.Classroom.FromString,
                     response_serializer=polypuppet__pb2.Profile.SerializeToString,
             ),
     }
@@ -83,7 +83,7 @@ class RemoteConnection(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def login_audience(request,
+    def login_classroom(request,
             target,
             options=(),
             channel_credentials=None,
@@ -93,8 +93,8 @@ class RemoteConnection(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/RemoteConnection/login_audience',
-            polypuppet__pb2.Audience.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/RemoteConnection/login_classroom',
+            polypuppet__pb2.Classroom.SerializeToString,
             polypuppet__pb2.Profile.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

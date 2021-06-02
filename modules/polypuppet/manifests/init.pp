@@ -8,7 +8,7 @@ class polypuppet (
   Integer $polypuppet_server_port,
 
   Variant[Integer, Undef] $building = undef,
-  Variant[Integer, Undef] $audience = undef,
+  Variant[Integer, Undef] $classroom = undef,
   Variant[String, Undef]  $token = undef,
 
   Boolean $enable_foreman,

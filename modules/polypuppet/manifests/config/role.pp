@@ -1,15 +1,15 @@
 class polypuppet::config::role(
-  $building = $polypuppet::building,
-  $audience = $polypuppet::audience,
-  $token    = $polypuppet::token,
+  $building  = $polypuppet::building,
+  $classroom = $polypuppet::classroom,
+  $token     = $polypuppet::token,
 ) {
 
-  if $audience != undef and $building != undef and $token != undef {
-    $hidden_command = Sensitive("polypuppet login audience ${building} ${audience} ${token}")
-    exec { 'setup audience':
+  if $classroom != undef and $building != undef and $token != undef {
+    $hidden_command = Sensitive("polypuppet login classroom ${building} ${classroom} ${token}")
+    exec { 'setup classroom':
       command => $hidden_command,
       path    => $::path,
-      unless  => "polypuppet test audience ${building} ${audience}",
+      unless  => "polypuppet test classroom ${building} ${classroom}",
     }
   }
 
