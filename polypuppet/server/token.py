@@ -18,7 +18,7 @@ class Token:
             CONFIG_DIR.mkdir(parents=True, exist_ok=True)
             with self.lock:
                 if TOKEN_PATH.exists():
-                    with open(TOKEN_PATH, 'r') as tokenfile:
+                    with open(TOKEN_PATH, 'r', encoding='UTF-8') as tokenfile:
                         self.token = tokenfile.readline()
         except Exception as exception:
             exception_message = Messages.cannot_create_config_file()
@@ -27,7 +27,7 @@ class Token:
     def set(self, token):
         with self.lock:
             self.token = token
-            with open(TOKEN_PATH, 'w') as tokenfile:
+            with open(TOKEN_PATH, 'w', encoding='UTF-8') as tokenfile:
                 tokenfile.write(self.token)
             os.chmod(TOKEN_PATH, 0o600)
 

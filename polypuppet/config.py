@@ -24,7 +24,7 @@ class Config:
             CONFIG_DIR.mkdir(parents=True, exist_ok=True)
             CONFIG_PATH.touch(exist_ok=True)
             with Config._lock:
-                with open(CONFIG_PATH, 'w') as configfile:
+                with open(CONFIG_PATH, 'w', encoding='UTF-8') as configfile:
                     self.config.write(configfile)
         except Exception as exception:
             exception_message = Messages.cannot_create_config_file()
