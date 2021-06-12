@@ -4,7 +4,7 @@ class polypuppet::puppet::agent (
 ) {
 
   if $autostart {
-    $runmode = 'server'
+    $runmode = 'service'
   } else {
     $runmode = 'none'
   }
