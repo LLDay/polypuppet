@@ -1,3 +1,4 @@
+import hmac
 import os
 import secrets
 from threading import Lock
@@ -47,4 +48,4 @@ class Token:
             TOKEN_PATH.unlink()
 
     def __eq__(self, value):
-        return isinstance(value, str) and self.get() == value
+        return isinstance(value, str) and hmac.compare_digest(self.get(), value)
