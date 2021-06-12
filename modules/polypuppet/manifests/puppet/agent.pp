@@ -31,11 +31,14 @@ class polypuppet::puppet::agent (
   if $allow_puppet {
 
     class { '::puppet':
+      codedir      => $polypuppet::defs::codedir,
       environment  => $polypuppet::environment,
       puppetmaster => $server_domain,
+      runinterval  => '1h',
       runmode      => $runmode,
       server       => false,
-      codedir      => $polypuppet::defs::codedir,
+      splay        => true,
+      splaylimit   => '20m',
     }
 
   }
