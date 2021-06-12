@@ -5,38 +5,73 @@ import sys
 
 class _MessagesEn:
 
+    #
+    # Help messages
+    #
+
+    def help_autosign():
+        return 'Return whether the server has a certname.'
+
+    def help_login():
+        return 'Login to the polypuppet server.'
+
+    def help_login_user():
+        return 'Login to the polypuppet server as a user.'
+
+    def help_login_classroom():
+        return 'Login to the polypuppet server as a classroom computer.'
+
     def help_verbose():
-        return 'Provide more output'
+        return 'Provide more output.'
 
-    def help_quiet():
-        return 'Supress output'
+    def help_config():
+        return 'Manage configs.'
 
-    def help_certname():
-        return ''
+    def help_test():
+        return 'Check polypuppet state.'
+
+    def help_test_classroom():
+        return 'Check whether the node has specified building and classroom numbers.'
+
+    def help_test_config():
+        return 'Check whether the specified config has passed value.'
+
+    def help_test_vm():
+        return 'Check whether the specified vm has been initialized.'
 
     def help_username():
-        return 'Username from CAS SPBSTU'
+        return 'Username from CAS SPBSTU.'
 
     def help_token():
-        return "Secret server's token"
+        return 'Manage token.'
+
+    def help_token_new():
+        return 'Generate new random token.'
+
+    def help_token_clear():
+        return 'Delete existing token.'
+
+    def help_token_set():
+        return 'Set token explicitly.'
 
     def help_classroom_number():
-        return 'Classroom number'
+        return 'Classroom number.'
 
     def help_server():
-        return 'Manages the server'
+        return 'Manage the server.'
 
     def help_server_daemon():
-        return 'Run the server as a daemon'
-
-    def help_server_restart():
-        return 'Restart the server if it has been ran'
+        return 'Run the server as a daemon.'
 
     def help_server_stop():
-        return 'Stop the server'
+        return 'Stop the server.'
 
     def help_password():
-        return 'Password for CAS SPBSTU'
+        return 'Password for CAS SPBSTU.'
+
+    #
+    # General messages
+    #
 
     def logged_in():
         return 'Logged in successfully'

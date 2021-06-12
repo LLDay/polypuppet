@@ -5,7 +5,7 @@ class polypuppet::config (
   $server_port   = $polypuppet::polypuppet_server_port,
 ) inherits polypuppet::defs {
 
-  include polypuppet::config::role
+  include polypuppet::config::classroom
 
   if $cert_waittime != undef {
     polypuppet::config::set { 'cert_waittime':

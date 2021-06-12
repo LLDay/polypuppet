@@ -36,7 +36,7 @@ def cli():
     pass
 
 
-@cli.command()
+@cli.command(help=Messages.help_autosign())
 @click.argument('certname')
 @verbosity_option
 def autosign(certname):
@@ -46,7 +46,7 @@ def autosign(certname):
         sys.exit(1)
 
 
-@cli.group('login')
+@cli.group('login', help=Messages.help_login())
 @verbosity_option
 def login_group():
     pass
@@ -60,7 +60,7 @@ def check_login(response):
         sys.exit(1)
 
 
-@login_group.command()
+@login_group.command(help=Messages.help_login_user())
 @click.argument('username', required=False)
 @click.argument('password', required=False)
 @verbosity_option
@@ -74,7 +74,7 @@ def user(username, password):
     check_login(response)
 
 
-@login_group.command()
+@login_group.command(help=Messages.help_login_classroom())
 @click.argument('building', required=True, type=click.INT)
 @click.argument('number', required=True, type=click.INT)
 @click.argument('token', required=True, type=click.STRING)
@@ -126,7 +126,7 @@ def server_daemon():
     os._exit(0)
 
 
-@cli.command(name='config')
+@cli.command(name='config', help=Messages.help_config())
 @click.argument('key', required=False)
 @click.argument('value', required=False)
 @verbosity_option
@@ -141,13 +141,13 @@ def manage_config(key, value):
         config.restricted_set(key, value)
 
 
-@cli.group(name='test')
+@cli.group(name='test', help=Messages.help_test())
 @verbosity_option
 def test_group():
     pass
 
 
-@test_group.command(name='classroom')
+@test_group.command(name='classroom', help=Messages.help_test_classroom())
 @click.argument('building')
 @click.argument('classroom')
 @verbosity_option
@@ -157,7 +157,7 @@ def test_classroom(building, classroom):
         sys.exit(1)
 
 
-@test_group.command(name='config')
+@test_group.command(name='config', help=Messages.help_test_config())
 @click.argument('key')
 @click.argument('value')
 @verbosity_option
@@ -170,16 +170,16 @@ def test_config(key, value):
         sys.exit(1)
 
 
-@test_group.command()
+@test_group.command(name='vm', help=Messages.help_test_vm())
 @click.argument('vm_name')
 @verbosity_option
-def vm(vm_name):
+def test_vm(vm_name):
     vagrant = Vagrant()
     if not vagrant.is_created(vm_name):
         exit(1)
 
 
-@cli.group(name='token', invoke_without_command=True)
+@cli.group(name='token', invoke_without_command=True, help=Messages.help_token())
 @click.pass_context
 @verbosity_option
 def token_group(ctx):
@@ -193,7 +193,7 @@ def token_group(ctx):
             sys.exit(1)
 
 
-@token_group.command(name='new')
+@token_group.command(name='new', help=Messages.help_token_new())
 @verbosity_option
 def token_new():
     agent = Agent()
@@ -201,14 +201,14 @@ def token_new():
     out.info(server_token)
 
 
-@token_group.command(name='clear')
+@token_group.command(name='clear', help=Messages.help_token_clear())
 @verbosity_option
 def token_clear():
     agent = Agent()
     agent.clear_token()
 
 
-@token_group.command(name='set')
+@token_group.command(name='set', help=Messages.help_token_set())
 @click.argument('token')
 @verbosity_option
 def token_set(token):

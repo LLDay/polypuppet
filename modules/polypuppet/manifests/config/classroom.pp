@@ -1,4 +1,4 @@
-class polypuppet::config::role(
+class polypuppet::config::classroom (
   $building  = $polypuppet::building,
   $classroom = $polypuppet::classroom,
   $token     = $polypuppet::token,
